@@ -4,7 +4,8 @@
 **
 Currently the only active file is gui_basics.py**
 
-Opens a window and the buttons all perform some funciton
+
+Opens a window and the buttons all perform some funciton, some of this funtionality is printed to the terminal currently
 
 The video frames are all the same as they reference just one picture thats being reused. to be updated
 
