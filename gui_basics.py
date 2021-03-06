@@ -134,10 +134,10 @@ class SubclipWindow(tk.Tk):
         # print(self.subclip_name)
 
     def on_create_subclip_button(self):
-        self.first_frame_image_location = Image.open("ddd1.png")
+        self.first_frame_image_location = Image.open("ddd.png")
         self.first_frame_image_location = self.first_frame_image_location.resize((150,100),Image.ANTIALIAS)
         self.first_frame_image = ImageTk.PhotoImage(self.first_frame_image_location)
-        self.end_frame_image_location = Image.open("ddd2.png")
+        self.end_frame_image_location = Image.open("ddd.png")
         self.end_frame_image_location  = self.end_frame_image_location.resize((150,100),Image.ANTIALIAS)
         self.end_frame_image = ImageTk.PhotoImage(self.end_frame_image_location)
         self.start_frame_label.config(image=self.first_frame_image)
