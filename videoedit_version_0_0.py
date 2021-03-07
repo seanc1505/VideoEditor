@@ -1,5 +1,10 @@
 from moviepy.editor import *
+import scipy
+clip = VideoFileClip("sample_video_clip.mp4") 
+# clip = clip.subclip(0, 35)
+# clip.ipython_display() 
+duration = clip.duration
+frame = clip.get_frame(3) 
 
-clip = VideoFileClip("20_11_22_freestyle.mp4") 
-clip = clip.subclip(0, 35)
-clip.ipython_display() 
+frame = scipy.misc.imresize(frame, (50, 50))
+print(frame)

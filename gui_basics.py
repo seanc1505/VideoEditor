@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter.constants import END, NE
+from tkinter import filedialog
 from typing import Text
 from datetime import date, datetime
 from PIL import ImageTk, Image  
+from moviepy.editor import *
 import math
 
 
@@ -19,9 +21,6 @@ class InitialWindow(tk.Tk):
         self.export_video_name = self.export_video_date + "_undefined"
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
-        self.source_video_image_location = Image.open("ddd.png")
-        self.source_video_image_location = self.source_video_image_location.resize((250,200),Image.ANTIALIAS)
-        self.source_video_image = ImageTk.PhotoImage(self.source_video_image_location)
         
         self.define_gui_components()
         
@@ -112,16 +111,22 @@ class InitialWindow(tk.Tk):
         self.source_video_name_label.grid(row=1,column=1)
         self.video_duration_label.grid(row=2,column=0)
         self.source_video_duration_label.grid(row=2,column=1)
-        self.source_video_duration_opening_frame_label.grid(row=3,columnspan=2)
+        self.source_video_duration_opening_frame_label.grid(row=3,column=0)
         self.source_video_details_frame.grid(row=2,column=0,sticky="NW")
 
 
     def on_new_source_video_button(self):
         print("New window opened, find file")
-        self.source_video_name = "GH10000"
+        self.source_video_name = filedialog.askopenfilename()
+        self.source_video_clip =  VideoFileClip(self.source_video_name) 
         self.source_video_name_label.config(text=self.source_video_name)
-        self.source_video_duration =  "00:03:10:14"
+        self.source_video_duration = self.source_video_clip.duration
         self.source_video_duration_label.config(text=self.source_video_duration)
+
+        self.source_video_image_array = self.source_video_clip.get_frame(0) 
+        self.source_video_image_location = Image.fromarray(self.source_video_image_array)
+        self.source_video_image_resized = self.source_video_image_location.resize((250,200))
+        self.source_video_image = ImageTk.PhotoImage(self.source_video_image_resized)
         self.source_video_duration_opening_frame = "Capture first frame and display here"
         self.source_video_duration_opening_frame_label.config(image=self.source_video_image)
         # Perform find file things
@@ -268,12 +273,12 @@ class SubclipWindow(tk.Tk):
 
     def on_create_subclip_button(self):
         # open start frame
-        self.first_frame_image_location = Image.open("ddd.png")
+        self.first_frame_image_location = Image.open("sample_frame.png")
         self.first_frame_image_location = self.first_frame_image_location.resize((150,100),Image.ANTIALIAS)
         self.first_frame_image = ImageTk.PhotoImage(self.first_frame_image_location)
         self.start_frame_label.config(image=self.first_frame_image)
         # open end frame
-        self.end_frame_image_location = Image.open("ddd.png")
+        self.end_frame_image_location = Image.open("sample_frame.png")
         self.end_frame_image_location  = self.end_frame_image_location.resize((150,100),Image.ANTIALIAS)
         self.end_frame_image = ImageTk.PhotoImage(self.end_frame_image_location)
         self.end_frame_label.config(image=self.end_frame_image)
