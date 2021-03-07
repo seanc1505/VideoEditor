@@ -23,26 +23,19 @@ class InitialWindow(tk.Tk):
         self.source_video_duration_opening_frame = "Select clip"
         
         self.define_gui_components()
-        
-
         self.video_date_entry.insert(0, self.export_video_date)
         self.session_type_entry.insert(0, self.session_type)
 
         # Export Name Set
         self.export_video_name_button = tk.Button(self.export_video_details_frame, text="Export name Set", command=self.on_export_video_name_button)
-        
         # Close button box
         self.close_button = tk.Button(self, text="Close",background="orange", command=self.quit)
-        
         # Tutorial Button 
         self.tutorial_button = tk.Button(self,text="Need help? \nTutorial",background="orange" ,command=self.on_tutorial_button)
-        
         # New Subclip Button
         self.new_subclip_button = tk.Button(self,text="New Subclip",command=self.on_new_subclip_button)
-        
         # New source video button
         self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
-        
         self.place_gui_components()
         
         
@@ -116,18 +109,19 @@ class InitialWindow(tk.Tk):
 
 
     def on_new_source_video_button(self):
-        print("New window opened, find file")
+        # Find source clip file name
         self.source_video_name = filedialog.askopenfilename()
-        self.source_video_clip =  VideoFileClip(self.source_video_name) 
         self.source_video_name_label.config(text=self.source_video_name)
+        # find source clip
+        self.source_video_clip =  VideoFileClip(self.source_video_name) 
+        # calc duration of source clip
         self.source_video_duration = self.source_video_clip.duration
         self.source_video_duration_label.config(text=self.source_video_duration)
-
+        # Show first frame
         self.source_video_image_array = self.source_video_clip.get_frame(0) 
         self.source_video_image_location = Image.fromarray(self.source_video_image_array)
         self.source_video_image_resized = self.source_video_image_location.resize((250,200))
         self.source_video_image = ImageTk.PhotoImage(self.source_video_image_resized)
-        self.source_video_duration_opening_frame = "Capture first frame and display here"
         self.source_video_duration_opening_frame_label.config(image=self.source_video_image)
         # Perform find file things
 
@@ -265,9 +259,14 @@ class SubclipWindow(tk.Tk):
         self.duration = (float(self.duration_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.duration_time_entry_sec.get('1.0',"end-1c"))        
         self.end_time = (float(self.end_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.end_time_entry_sec.get('1.0',"end-1c"))
         # calculate the times/duration
-        self.calc_duration()
-        # pushes the values to widgets
-        self.set_time_vals()
+        time_valid = self.calc_duration()
+        if time_valid:
+            self.calc_min_sec()
+            # pushes the values to widgets
+            self.delete_time_entries()
+            self.set_time_vals()
+            
+
         self.number_of_subclips +=1
         self.subclip_name = self.clip_number_entry.get()
 
@@ -303,17 +302,21 @@ class SubclipWindow(tk.Tk):
         else:
             self.on_time_entry_reset_button()
             self.subclip_info_label.config(text="Duration is out of bounds",background='red')
-            return
+            return False
 
         # ensures time is within limits 
         if self.check_times() == False:
-            return
+            return False
         else:
             self.subclip_info_label.config(text="Duration is within bounds",background='green')
+            return True
 
-        self.delete_time_entries()
         
+
         # sets minute and seconds values for each time
+        
+    
+    def calc_min_sec(self):
         self.start_time_min = math.floor(self.start_time/60)
         self.start_time_sec = (self.start_time%60)
         
@@ -322,7 +325,7 @@ class SubclipWindow(tk.Tk):
 
         self.end_time_min = math.floor(self.end_time/60)
         self.end_time_sec = (self.end_time%60)
-        
+
     def set_time_vals(self):
         # configures the time entries
         self.start_time_entry_min.insert('1.0',str(self.start_time_min))
