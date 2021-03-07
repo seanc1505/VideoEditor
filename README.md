@@ -3,9 +3,10 @@
 
 
 **Currently the only active file is gui_basics.py**
+
 07/03/21 Update:
 New source video is now funcitonal. 
-can find a clip and import it
+can find a clip and import it.
     Duration,name and initial frame of the clip are displayed on the main window.
     
 Opens a window and the buttons all perform some funciton, some of this funtionality is printed to the terminal currently
