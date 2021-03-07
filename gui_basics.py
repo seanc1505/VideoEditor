@@ -136,22 +136,28 @@ class InitialWindow(tk.Tk):
         print("Display Tutorial")
 
     def on_new_subclip_button(self):
-        subclip = SubclipWindow()
+        subclip = SubclipWindow(source_window=self,number_of_subclips=self.number_of_subclips,source_video_clip=self.source_video_clip)
         subclip.geometry("500x400")
-        subclip.number_of_subclips =self.number_of_subclips
+        # subclip.number_of_subclips =self.number_of_subclips
         subclip.mainloop()
+        self.number_of_subclips = subclip.number_of_subclips
 
 
 
 class SubclipWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self,source_window,number_of_subclips,source_video_clip):
         tk.Toplevel.__init__(self)
 
         # Variable set up
-        self.number_of_subclips=0
-        self.subclip_name = ""
+        source_video = source_window
+        self.number_of_subclips =number_of_subclips
+        self.source_video = source_video_clip
+        print(self.source_video)
+        self.subclip_name = "" 
         self.time_calculated = False
-        self.clip_time = 999999
+        self.clip_time = source_video.source_video_duration
+        print(self.clip_time)
+        self.time_valid = False
     
         # Time Entry-Frame
         self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
@@ -259,29 +265,38 @@ class SubclipWindow(tk.Tk):
         self.duration = (float(self.duration_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.duration_time_entry_sec.get('1.0',"end-1c"))        
         self.end_time = (float(self.end_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.end_time_entry_sec.get('1.0',"end-1c"))
         # calculate the times/duration
-        time_valid = self.calc_duration()
-        if time_valid:
+        self.time_valid = self.calc_duration()
+        if self.time_valid:
             self.calc_min_sec()
             # pushes the values to widgets
             self.delete_time_entries()
             self.set_time_vals()
-            
-
-        self.number_of_subclips +=1
-        self.subclip_name = self.clip_number_entry.get()
+        
 
     def on_create_subclip_button(self):
-        # open start frame
-        self.first_frame_image_location = Image.open("sample_frame.png")
-        self.first_frame_image_location = self.first_frame_image_location.resize((150,100),Image.ANTIALIAS)
-        self.first_frame_image = ImageTk.PhotoImage(self.first_frame_image_location)
-        self.start_frame_label.config(image=self.first_frame_image)
-        # open end frame
-        self.end_frame_image_location = Image.open("sample_frame.png")
-        self.end_frame_image_location  = self.end_frame_image_location.resize((150,100),Image.ANTIALIAS)
-        self.end_frame_image = ImageTk.PhotoImage(self.end_frame_image_location)
-        self.end_frame_label.config(image=self.end_frame_image)
-        print("subclip created")
+        if self.time_valid:
+            # open start frame
+            self.first_frame_image_array = self.source_video.get_frame(self.start_time) 
+            self.first_frame_image_location = Image.fromarray(self.first_frame_image_array)
+            self.first_frame_image_resized = self.first_frame_image_location.resize((150,100))
+            self.first_frame_image = ImageTk.PhotoImage(self.first_frame_image_resized)
+            self.start_frame_label.config(image=self.first_frame_image)
+            # open end frame
+            self.end_frame_image_array = self.source_video.get_frame(self.end_time) 
+            self.end_frame_image_location = Image.fromarray(self.end_frame_image_array)
+            self.end_frame_image_resized = self.end_frame_image_location.resize((150,100))
+            self.end_frame_image = ImageTk.PhotoImage(self.end_frame_image_resized)
+            self.end_frame_label.config(image=self.end_frame_image)
+
+            self.number_of_subclips +=1
+            self.subclip_name = self.clip_number_entry.get()
+            self.clip_number_entry.delete(0,END)
+            self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
+
+            print("subclip created")
+        else:
+            self.subclip_info_label.config(text="Please enter valid times before creating clip",background='red')
+
 
     def calc_duration(self):
         # checks and validates start time/end time and calcs duration
@@ -291,7 +306,8 @@ class SubclipWindow(tk.Tk):
             elif self.duration > 0:
                 self.end_time = self.start_time + self.duration
             else:
-                self.end_time = 9999
+                self.end_time = self.clip_time
+                self.duration = self.end_time-self.start_time
         elif self.end_time > 0:
             if self.duration > 0:
                 self.start_time = self.end_time - self.duration
