@@ -7,7 +7,6 @@ from PIL import ImageTk, Image
 from moviepy.editor import *
 import math
 
-
 class InitialWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -21,6 +20,7 @@ class InitialWindow(tk.Tk):
         self.export_video_name = self.export_video_date + "_undefined"
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
+        self.subclip_list_dict = {}
         
         self.define_gui_components()
         self.video_date_entry.insert(0, self.export_video_date)
@@ -111,7 +111,10 @@ class InitialWindow(tk.Tk):
     def on_new_source_video_button(self):
         # Find source clip file name
         self.source_video_name = filedialog.askopenfilename()
-        self.source_video_name_label.config(text=self.source_video_name)
+        if len(self.source_video_name) >50:
+            first_half = self.source_video_name[:50]
+            second_half = self.source_video_name[50:]
+        self.source_video_name_label.config(text=first_half + "\n"+second_half)
         # find source clip
         self.source_video_clip =  VideoFileClip(self.source_video_name) 
         # calc duration of source clip
@@ -123,6 +126,7 @@ class InitialWindow(tk.Tk):
         self.source_video_image_resized = self.source_video_image_location.resize((250,200))
         self.source_video_image = ImageTk.PhotoImage(self.source_video_image_resized)
         self.source_video_duration_opening_frame_label.config(image=self.source_video_image)
+        self.source_video_duration_opening_frame_label.image = self.source_video_image
         # Perform find file things
 
     def on_export_video_name_button(self):
@@ -158,6 +162,7 @@ class SubclipWindow(tk.Tk):
         self.clip_time = source_video.source_video_duration
         print(self.clip_time)
         self.time_valid = False
+        self.subclip_details_dict = {}
     
         # Time Entry-Frame
         self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
@@ -268,6 +273,8 @@ class SubclipWindow(tk.Tk):
         self.time_valid = self.calc_duration()
         if self.time_valid:
             self.calc_min_sec()
+            self.subclip_details_dict["start time"] = self.start_time
+            self.subclip_details_dict["end time"] = self.end_time
             # pushes the values to widgets
             self.delete_time_entries()
             self.set_time_vals()
@@ -276,22 +283,33 @@ class SubclipWindow(tk.Tk):
     def on_create_subclip_button(self):
         if self.time_valid:
             # open start frame
+            print(self.start_time)
             self.first_frame_image_array = self.source_video.get_frame(self.start_time) 
             self.first_frame_image_location = Image.fromarray(self.first_frame_image_array)
             self.first_frame_image_resized = self.first_frame_image_location.resize((150,100))
             self.first_frame_image = ImageTk.PhotoImage(self.first_frame_image_resized)
             self.start_frame_label.config(image=self.first_frame_image)
+            self.start_frame_label.image = self.first_frame_image
             # open end frame
-            self.end_frame_image_array = self.source_video.get_frame(self.end_time) 
+            # Slight fix to the issue of the end time producing an error
+            # self.end_frame_image_array = self.source_video.get_frame((self.end_time-.1)) 
+            print(self.end_time)
+            if self.end_time > (self.clip_time-.08):
+                self.end_time = self.end_time-.08
+            self.end_frame_image_array = self.source_video.get_frame((self.end_time)) 
             self.end_frame_image_location = Image.fromarray(self.end_frame_image_array)
             self.end_frame_image_resized = self.end_frame_image_location.resize((150,100))
             self.end_frame_image = ImageTk.PhotoImage(self.end_frame_image_resized)
             self.end_frame_label.config(image=self.end_frame_image)
+            self.end_frame_label.image = self.end_frame_image
 
             self.number_of_subclips +=1
             self.subclip_name = self.clip_number_entry.get()
+            self.subclip_details_dict["subclip name"] = self.subclip_name
             self.clip_number_entry.delete(0,END)
             self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
+
+            print(self.subclip_details_dict)
 
             print("subclip created")
         else:
@@ -307,6 +325,8 @@ class SubclipWindow(tk.Tk):
                 self.end_time = self.start_time + self.duration
             else:
                 self.end_time = self.clip_time
+                print("we here at the cause of the error")
+                print(repr(self.end_time))
                 self.duration = self.end_time-self.start_time
         elif self.end_time > 0:
             if self.duration > 0:
@@ -319,7 +339,7 @@ class SubclipWindow(tk.Tk):
             self.on_time_entry_reset_button()
             self.subclip_info_label.config(text="Duration is out of bounds",background='red')
             return False
-
+        print(repr(self.end_time))
         # ensures time is within limits 
         if self.check_times() == False:
             return False
