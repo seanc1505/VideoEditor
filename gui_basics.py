@@ -70,6 +70,7 @@ class InitialWindow(tk.Tk):
         self.source_video_duration_opening_frame_label = tk.Label(self.source_video_details_frame,text = "Select Source video")
 
 
+
     def place_gui_components(self):
         # Opening Label
         self.title_greeting_label.grid(row=0,column=0)
@@ -224,6 +225,9 @@ class SubclipWindow(tk.Toplevel):
         self.clip_number_label = tk.Label(self.subclip_details_frame,text="Current Subclip number")
         self.clip_number_entry = tk.Entry(self.subclip_details_frame)
 
+        self.subclip_details_label_text = "Enter Subclip"
+        self.subclip_details_label = tk.Label(self,text = self.subclip_details_label_text)
+
     def place_subclip_gui_components(self):
         # subclip info
         self.subclip_info_label.grid(row=0,column=0)   
@@ -266,8 +270,13 @@ class SubclipWindow(tk.Toplevel):
         self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
         self.create_subclip_button.grid(row=2,column=0)
         self.subclip_details_frame.grid(row=2,column=1)     
+        # Subclip details label
+        self.subclip_details_label.grid(row=4,column=0,columnspan=2)
+        
         # Close button
         self.close_subclip_button.grid(row=5,column=0,columnspan=4)
+
+
 
     def on_time_entry_reset_button(self):
         self.subclip_info_label.config(text="Please Enter subclip information" ,background="SystemButtonFace")
@@ -307,7 +316,7 @@ class SubclipWindow(tk.Toplevel):
             self.start_frame_label.image = self.first_frame_image
             # open end frame
             # Slight fix to the issue of the end time producing an error
-            # self.end_frame_image_array = self.source_video.get_frame((self.end_time-.1)) 
+            # self.end_frame_image_array = self.source_video.get_frame((self.end_time-.08)) 
             print(self.end_time)
             if self.end_time > (self.clip_time-.08):
                 self.end_time = self.end_time-.08
@@ -321,6 +330,8 @@ class SubclipWindow(tk.Toplevel):
             self.number_of_subclips +=1
             self.subclip_name = self.clip_number_entry.get()
             self.subclip_details_dict["subclip name"] = self.subclip_name
+            self.subclip_details_label_text = self.subclip_details_label_text +"\n Subclip : " +  self.subclip_details_dict["subclip name"] + " Start Time: " +str(self.subclip_details_dict["start time"])+" End Time: "+str(self.subclip_details_dict["end time"])
+            self.subclip_details_label.config(text = self.subclip_details_label_text)
             self.clip_number_entry.delete(0,END)
             self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
 
