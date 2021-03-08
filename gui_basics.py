@@ -74,7 +74,7 @@ class InitialWindow(tk.Tk):
         # Opening Label
         self.title_greeting_label.grid(row=0,column=0)
         # Export video name details frame
-        self.export_video_details_frame.grid(row=1,column=0,columnspan=3)
+        self.export_video_details_frame.grid(row=1,column=0,columnspan=4)
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
         self.athlete_name_label.grid(row = 0,column = 0)
@@ -141,6 +141,8 @@ class InitialWindow(tk.Tk):
 
     def on_new_subclip_button(self):
         subclip = SubclipWindow(source_window=self,number_of_subclips=self.number_of_subclips,source_video_clip=self.source_video_clip)
+        # subclip.focus
+        # subclip.show
         subclip.geometry("500x400")
         # subclip.number_of_subclips =self.number_of_subclips
         subclip.mainloop()
@@ -148,7 +150,17 @@ class InitialWindow(tk.Tk):
 
 
 
-class SubclipWindow(tk.Tk):
+
+
+
+
+
+
+
+
+
+
+class SubclipWindow(tk.Toplevel):
     def __init__(self,source_window,number_of_subclips,source_video_clip):
         tk.Toplevel.__init__(self)
 
@@ -174,10 +186,13 @@ class SubclipWindow(tk.Tk):
         # Create Subclip Button
         self.create_subclip_button = tk.Button(self.subclip_details_frame, text="Create Subclip", command=self.on_create_subclip_button)
         # Close button
-        self.close_subclip_button = tk.Button(self, text="Close",background="orange", command=self.quit)
+        self.close_subclip_button = tk.Button(self, text="Close",background="orange", command=lambda: self.on_close_subclip_button())
         self.place_subclip_gui_components()
         self.time_entry_frame.grid(row=1,column=0,columnspan=4)  
-        
+    
+    def on_close_subclip_button(self):
+        self.destroy()
+
     def define_subclip_gui_components(self):      
         self.subclip_info_label = tk.Label(self,text="Please Enter subclip information")
         # start time
@@ -393,7 +408,7 @@ class SubclipWindow(tk.Tk):
 
 
 app = InitialWindow()
-app.geometry("700x500")
+app.geometry("900x500")
 app.mainloop()
 
 
