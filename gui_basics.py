@@ -33,13 +33,17 @@ class InitialWindow(tk.Tk):
         # Export Name Set
         self.export_video_name_button = tk.Button(self.export_video_details_frame, text="Export name Set", command=self.on_export_video_name_button)
         # Close button box
-        self.close_button = tk.Button(self, text="Close",background="orange", command=self.quit)
+        self.close_button = tk.Button(self, text="Close",background="orange", command=  self.on_close_button)
         # Tutorial Button 
         self.tutorial_button = tk.Button(self,text="Need help? \nTutorial",background="orange" ,command=self.on_tutorial_button)
         # New Subclip Button
         self.new_subclip_button = tk.Button(self.new_subclip_frame,text="New Subclip",command=self.on_new_subclip_button)
         # New source video button
         self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
+        # Export clips Button 
+        self.export_video_button = tk.Button(self.new_subclip_frame,text="Export the videos", command= self.on_export_video_button)
+       
+        
         self.place_gui_components()
         
         
@@ -85,6 +89,7 @@ class InitialWindow(tk.Tk):
         # subclip frame
         self.new_subclip_frame.grid(row=2,column=1,sticky="NW")
         self.subclip_list_label.grid(row=1,column=0)
+        self.export_video_button.grid(row = 2,column = 0)
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
         self.athlete_name_label.grid(row = 0,column = 0)
@@ -117,7 +122,10 @@ class InitialWindow(tk.Tk):
         self.source_video_duration_opening_frame_label.grid(row=3,column=0)
         self.source_video_details_frame.grid(row=2,column=0,sticky="NW")
 
+    def on_close_button(self):
+        self.destroy()
 
+        
     def on_new_source_video_button(self):
         # Find source clip file name
         self.source_video_name = filedialog.askopenfilename()
@@ -150,6 +158,15 @@ class InitialWindow(tk.Tk):
         self.export_video_name = self.export_video_date+ "_" + self.session_type + "_" + self.athlete_name 
         self.export_video_name_label.config(text="Video Name: " +self.export_video_name)
 
+    def on_export_video_button(self):
+        print("lets Export")
+        if self.subclip_list == []:
+            self.export_video_button.config(text="Enter min 1 subclip",bg ="red")
+            self.new_subclip_button.config(bg="red")
+        else:
+            print("Do moviepy stuff")
+
+
     def on_tutorial_button(self):
         print("Display Tutorial")
 
@@ -157,13 +174,14 @@ class InitialWindow(tk.Tk):
     def on_subclip_close(self):
         for subclip in self.subclip_list:
             current_sublist = subclip
-            self.subclip_list_label_string += "Clip number: " + subclip["subclip name"]
-            self.subclip_list_label_string += " strt: " + str(subclip["start time"])
-            self.subclip_list_label_string += " end: " + str(subclip["end time"]) + "\n"
+            if  ("Clip number: " + subclip["subclip name"]) not in self.subclip_list_label_string:
+                self.subclip_list_label_string += "Clip number: " + subclip["subclip name"]
+                self.subclip_list_label_string += " strt: " + str(subclip["start time"])
+                self.subclip_list_label_string += " end: " + str(subclip["end time"]) + "\n"
         self.subclip_list_label.config(text=self.subclip_list_label_string)
         print(self.subclip_list)
 
-
+     
     def on_new_subclip_button(self):
         if self.source_video_clip == "undefined":
             self.new_source_video_button.config(text="Set Source video first",bg="red")
@@ -219,6 +237,7 @@ class SubclipWindow(tk.Toplevel):
         self.create_subclip_button = tk.Button(self.subclip_details_frame, text="Create Subclip", command=lambda: self.on_create_subclip_button(source_window))
         # Close button
         self.close_subclip_button = tk.Button(self, text="Done",background="orange", command=lambda: self.on_close_subclip_button(source_window))
+
         self.place_subclip_gui_components()
         self.time_entry_frame.grid(row=1,column=0,columnspan=4)  
     
