@@ -18,6 +18,7 @@ class InitialWindow(tk.Tk):
         self.export_video_date = datetime.today().strftime('%Y_%m_%d')
         self.export_video_date = self.export_video_date[2:]
         self.export_video_name = self.export_video_date + "_undefined"
+        self.source_video_clip = "undefined"
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
         self.subclip_list_dict = {}
@@ -75,7 +76,7 @@ class InitialWindow(tk.Tk):
         # Opening Label
         self.title_greeting_label.grid(row=0,column=0)
         # Export video name details frame
-        self.export_video_details_frame.grid(row=1,column=0,columnspan=4)
+        self.export_video_details_frame.grid(row=1,column=0,columnspan=6)
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
         self.athlete_name_label.grid(row = 0,column = 0)
@@ -93,7 +94,7 @@ class InitialWindow(tk.Tk):
         # Buttons
         self.export_video_name_button.grid(row = 1,column = 0,columnspan=2)
         self.tutorial_button.grid(row=0,column=1)
-        self.new_subclip_button.grid(row=2,column=2,sticky="W")
+        self.new_subclip_button.grid(row=2,column=1,sticky="NW")
         self.new_source_video_button.grid(row=0,column=0)
         self.close_button.grid(row=5,column=1)
         
@@ -113,9 +114,12 @@ class InitialWindow(tk.Tk):
         # Find source clip file name
         self.source_video_name = filedialog.askopenfilename()
         if len(self.source_video_name) >50:
-            first_half = self.source_video_name[:50]
-            second_half = self.source_video_name[50:]
-        self.source_video_name_label.config(text=first_half + "\n"+second_half)
+            length = int(math.floor(len(self.source_video_name)/2))
+            first_half = self.source_video_name[:(length)]
+            second_half = self.source_video_name[(length):]
+            self.source_video_name_label.config(text=first_half + "\n"+second_half)
+        else:
+            self.source_video_name_label.config(text= self.source_video_name)
         # find source clip
         self.source_video_clip =  VideoFileClip(self.source_video_name) 
         # calc duration of source clip
@@ -124,11 +128,12 @@ class InitialWindow(tk.Tk):
         # Show first frame
         self.source_video_image_array = self.source_video_clip.get_frame(0) 
         self.source_video_image_location = Image.fromarray(self.source_video_image_array)
-        self.source_video_image_resized = self.source_video_image_location.resize((250,200))
+        self.source_video_image_resized = self.source_video_image_location.resize((150,80))
         self.source_video_image = ImageTk.PhotoImage(self.source_video_image_resized)
         self.source_video_duration_opening_frame_label.config(image=self.source_video_image)
         self.source_video_duration_opening_frame_label.image = self.source_video_image
         # Perform find file things
+        self.new_source_video_button.config(text="New Source video",bg="green")
 
     def on_export_video_name_button(self):
         self.athlete_name = self.athlete_name_entry.get()
@@ -141,13 +146,22 @@ class InitialWindow(tk.Tk):
         print("Display Tutorial")
 
     def on_new_subclip_button(self):
-        subclip = SubclipWindow(source_window=self,number_of_subclips=self.number_of_subclips,source_video_clip=self.source_video_clip)
-        # subclip.focus
-        # subclip.show
-        subclip.geometry("500x400")
-        # subclip.number_of_subclips =self.number_of_subclips
-        subclip.mainloop()
-        self.number_of_subclips = subclip.number_of_subclips
+        if self.source_video_clip == "undefined":
+            self.new_source_video_button.config(text="Set Source video first",bg="red")
+            self.new_subclip_button.config(text="Set Source video first",bg="red")
+        else:
+            
+            self.new_subclip_button.config(text="Subclip video",bg="green")
+        # New source video button
+            self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
+        
+            subclip = SubclipWindow(source_window=self,number_of_subclips=self.number_of_subclips,source_video_clip=self.source_video_clip)
+            # subclip.focus
+            # subclip.show
+            subclip.geometry("500x400")
+            # subclip.number_of_subclips =self.number_of_subclips
+            subclip.mainloop()
+            self.number_of_subclips = subclip.number_of_subclips
 
 
 
@@ -169,11 +183,9 @@ class SubclipWindow(tk.Toplevel):
         source_video = source_window
         self.number_of_subclips =number_of_subclips
         self.source_video = source_video_clip
-        print(self.source_video)
         self.subclip_name = "" 
         self.time_calculated = False
         self.clip_time = source_video.source_video_duration
-        print(self.clip_time)
         self.time_valid = False
         self.subclip_details_dict = {}
     
@@ -307,7 +319,6 @@ class SubclipWindow(tk.Toplevel):
     def on_create_subclip_button(self):
         if self.time_valid:
             # open start frame
-            print(self.start_time)
             self.first_frame_image_array = self.source_video.get_frame(self.start_time) 
             self.first_frame_image_location = Image.fromarray(self.first_frame_image_array)
             self.first_frame_image_resized = self.first_frame_image_location.resize((150,100))
@@ -317,7 +328,6 @@ class SubclipWindow(tk.Toplevel):
             # open end frame
             # Slight fix to the issue of the end time producing an error
             # self.end_frame_image_array = self.source_video.get_frame((self.end_time-.08)) 
-            print(self.end_time)
             if self.end_time > (self.clip_time-.08):
                 self.end_time = self.end_time-.08
             self.end_frame_image_array = self.source_video.get_frame((self.end_time)) 
@@ -351,8 +361,6 @@ class SubclipWindow(tk.Toplevel):
                 self.end_time = self.start_time + self.duration
             else:
                 self.end_time = self.clip_time
-                print("we here at the cause of the error")
-                print(repr(self.end_time))
                 self.duration = self.end_time-self.start_time
         elif self.end_time > 0:
             if self.duration > 0:
