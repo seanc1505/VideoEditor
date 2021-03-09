@@ -125,7 +125,7 @@ class InitialWindow(tk.Tk):
     def on_close_button(self):
         self.destroy()
 
-        
+
     def on_new_source_video_button(self):
         # Find source clip file name
         self.source_video_name = filedialog.askopenfilename()
@@ -192,20 +192,12 @@ class InitialWindow(tk.Tk):
         # New source video button
             self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
         
-            self.subclip = SubclipWindow(source_window=self,source_video_clip=self.source_video_clip)
+            self.subclip = SubclipWindow(source_window=self)
             # subclip.focus
             # subclip.show
             self.subclip.geometry("500x400")
             # subclip.number_of_subclips =self.number_of_subclips
             self.subclip.mainloop()
-            print(self.number_of_subclips)
-            print(self.subclip_list)
-
-
-
-
-
-
 
 
 
@@ -214,12 +206,12 @@ class InitialWindow(tk.Tk):
 
 
 class SubclipWindow(tk.Toplevel):
-    def __init__(self,source_window,source_video_clip):
+    def __init__(self,source_window):
         tk.Toplevel.__init__(self,source_window)
         
         # Variable set up
         self.number_of_subclips = source_window.number_of_subclips
-        self.source_video = source_video_clip
+        self.source_video = source_window.source_video_clip
         self.subclip_name = "" 
         self.time_calculated = False
         self.clip_time = source_window.source_video_duration
