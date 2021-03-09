@@ -1,9 +1,11 @@
+from re import sub
 import tkinter as tk
 from tkinter.constants import END, NE
 from tkinter import filedialog
 from typing import Text
 from datetime import date, datetime
-from PIL import ImageTk, Image  
+from PIL import ImageTk, Image
+import moviepy  
 from moviepy.editor import *
 import math
 
@@ -21,7 +23,8 @@ class InitialWindow(tk.Tk):
         self.source_video_clip = "undefined"
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
-        self.subclip_list_dict = {}
+        self.subclip_list_label_string = "Subclip List: \n"
+        self.subclip_list = []
         
         self.define_gui_components()
         self.video_date_entry.insert(0, self.export_video_date)
@@ -34,7 +37,7 @@ class InitialWindow(tk.Tk):
         # Tutorial Button 
         self.tutorial_button = tk.Button(self,text="Need help? \nTutorial",background="orange" ,command=self.on_tutorial_button)
         # New Subclip Button
-        self.new_subclip_button = tk.Button(self,text="New Subclip",command=self.on_new_subclip_button)
+        self.new_subclip_button = tk.Button(self.new_subclip_frame,text="New Subclip",command=self.on_new_subclip_button)
         # New source video button
         self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
         self.place_gui_components()
@@ -59,7 +62,9 @@ class InitialWindow(tk.Tk):
         self.session_type_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=150,height=75)
         self.session_type_label= tk.Label(self.session_type_frame,text="Session type: ")
         self.session_type_entry = tk.Entry(self.session_type_frame)
-        
+        # Subclip frame 
+        self.new_subclip_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
+        self.subclip_list_label = tk.Label(self.new_subclip_frame, text= self.subclip_list_label_string)
         # Export video name label
         self.export_video_name_label = tk.Label(self.export_video_details_frame,text = "Video Name: " +self.export_video_name)
         # Source video frame
@@ -77,6 +82,9 @@ class InitialWindow(tk.Tk):
         self.title_greeting_label.grid(row=0,column=0)
         # Export video name details frame
         self.export_video_details_frame.grid(row=1,column=0,columnspan=6)
+        # subclip frame
+        self.new_subclip_frame.grid(row=2,column=1,sticky="NW")
+        self.subclip_list_label.grid(row=1,column=0)
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
         self.athlete_name_label.grid(row = 0,column = 0)
@@ -94,7 +102,7 @@ class InitialWindow(tk.Tk):
         # Buttons
         self.export_video_name_button.grid(row = 1,column = 0,columnspan=2)
         self.tutorial_button.grid(row=0,column=1)
-        self.new_subclip_button.grid(row=2,column=1,sticky="NW")
+        self.new_subclip_button.grid(row=0,column=0,sticky="NW")
         self.new_source_video_button.grid(row=0,column=0)
         self.close_button.grid(row=5,column=1)
         
@@ -121,7 +129,7 @@ class InitialWindow(tk.Tk):
         else:
             self.source_video_name_label.config(text= self.source_video_name)
         # find source clip
-        self.source_video_clip =  VideoFileClip(self.source_video_name) 
+        self.source_video_clip =  moviepy.VideoFileClip(self.source_video_name)
         # calc duration of source clip
         self.source_video_duration = self.source_video_clip.duration
         self.source_video_duration_label.config(text=self.source_video_duration)
@@ -145,6 +153,17 @@ class InitialWindow(tk.Tk):
     def on_tutorial_button(self):
         print("Display Tutorial")
 
+
+    def on_subclip_close(self):
+        for subclip in self.subclip_list:
+            current_sublist = subclip
+            self.subclip_list_label_string += "Clip number: " + subclip["subclip name"]
+            self.subclip_list_label_string += " strt: " + str(subclip["start time"])
+            self.subclip_list_label_string += " end: " + str(subclip["end time"]) + "\n"
+        self.subclip_list_label.config(text=self.subclip_list_label_string)
+        print(self.subclip_list)
+
+
     def on_new_subclip_button(self):
         if self.source_video_clip == "undefined":
             self.new_source_video_button.config(text="Set Source video first",bg="red")
@@ -155,13 +174,14 @@ class InitialWindow(tk.Tk):
         # New source video button
             self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
         
-            subclip = SubclipWindow(source_window=self,number_of_subclips=self.number_of_subclips,source_video_clip=self.source_video_clip)
+            self.subclip = SubclipWindow(source_window=self,source_video_clip=self.source_video_clip)
             # subclip.focus
             # subclip.show
-            subclip.geometry("500x400")
+            self.subclip.geometry("500x400")
             # subclip.number_of_subclips =self.number_of_subclips
-            subclip.mainloop()
-            self.number_of_subclips = subclip.number_of_subclips
+            self.subclip.mainloop()
+            print(self.number_of_subclips)
+            print(self.subclip_list)
 
 
 
@@ -176,16 +196,15 @@ class InitialWindow(tk.Tk):
 
 
 class SubclipWindow(tk.Toplevel):
-    def __init__(self,source_window,number_of_subclips,source_video_clip):
-        tk.Toplevel.__init__(self)
-
+    def __init__(self,source_window,source_video_clip):
+        tk.Toplevel.__init__(self,source_window)
+        
         # Variable set up
-        source_video = source_window
-        self.number_of_subclips =number_of_subclips
+        self.number_of_subclips = source_window.number_of_subclips
         self.source_video = source_video_clip
         self.subclip_name = "" 
         self.time_calculated = False
-        self.clip_time = source_video.source_video_duration
+        self.clip_time = source_window.source_video_duration
         self.time_valid = False
         self.subclip_details_dict = {}
     
@@ -193,17 +212,19 @@ class SubclipWindow(tk.Toplevel):
         self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
         self.define_subclip_gui_components()
         # Calculate time button
-        self.time_entry_button = tk.Button(self.time_entry_frame, text="Calculate time", command=self.on_time_entry_button)
+        self.time_entry_button = tk.Button(self.time_entry_frame, text="Calculate time", command= self.on_time_entry_button)
         # Reset time button
-        self.time_entry_reset_button = tk.Button(self.time_entry_frame, text="Reset Times", command=self.on_time_entry_reset_button)
+        self.time_entry_reset_button = tk.Button(self.time_entry_frame, text="Reset Times", command= self.on_time_entry_reset_button)
         # Create Subclip Button
-        self.create_subclip_button = tk.Button(self.subclip_details_frame, text="Create Subclip", command=self.on_create_subclip_button)
+        self.create_subclip_button = tk.Button(self.subclip_details_frame, text="Create Subclip", command=lambda: self.on_create_subclip_button(source_window))
         # Close button
-        self.close_subclip_button = tk.Button(self, text="Close",background="orange", command=lambda: self.on_close_subclip_button())
+        self.close_subclip_button = tk.Button(self, text="Done",background="orange", command=lambda: self.on_close_subclip_button(source_window))
         self.place_subclip_gui_components()
         self.time_entry_frame.grid(row=1,column=0,columnspan=4)  
     
-    def on_close_subclip_button(self):
+    def on_close_subclip_button(self,source_window):
+        source_window.number_of_subclips = self.number_of_subclips
+        source_window.on_subclip_close()
         self.destroy()
 
     def define_subclip_gui_components(self):      
@@ -316,7 +337,7 @@ class SubclipWindow(tk.Toplevel):
             self.set_time_vals()
         
 
-    def on_create_subclip_button(self):
+    def on_create_subclip_button(self,source_window):
         if self.time_valid:
             # open start frame
             self.first_frame_image_array = self.source_video.get_frame(self.start_time) 
@@ -348,8 +369,12 @@ class SubclipWindow(tk.Toplevel):
             print(self.subclip_details_dict)
 
             print("subclip created")
+            
+            source_window.subclip_list.append(self.subclip_details_dict.copy())
+            print(source_window.subclip_list)
         else:
             self.subclip_info_label.config(text="Please enter valid times before creating clip",background='red')
+
 
 
     def calc_duration(self):
