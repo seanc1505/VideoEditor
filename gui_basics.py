@@ -9,6 +9,8 @@ import moviepy
 from moviepy.editor import *
 import math
 
+from moviepy.video.compositing.concatenate import concatenate_videoclips
+
 class InitialWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -23,7 +25,8 @@ class InitialWindow(tk.Tk):
         self.source_video_clip = "undefined"
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
-        self.subclip_list_label_string = "Subclip List: \n"
+        self.subclip_dict_list_label_string = "Subclip List: \n"
+        self.subclip_dict_list = []
         self.subclip_list = []
         
         self.define_gui_components()
@@ -68,7 +71,7 @@ class InitialWindow(tk.Tk):
         self.session_type_entry = tk.Entry(self.session_type_frame)
         # Subclip frame 
         self.new_subclip_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
-        self.subclip_list_label = tk.Label(self.new_subclip_frame, text= self.subclip_list_label_string)
+        self.subclip_dict_list_label = tk.Label(self.new_subclip_frame, text= self.subclip_dict_list_label_string)
         # Export video name label
         self.export_video_name_label = tk.Label(self.export_video_details_frame,text = "Video Name: " +self.export_video_name)
         # Source video frame
@@ -88,7 +91,7 @@ class InitialWindow(tk.Tk):
         self.export_video_details_frame.grid(row=1,column=0,columnspan=6)
         # subclip frame
         self.new_subclip_frame.grid(row=2,column=1,sticky="NW")
-        self.subclip_list_label.grid(row=1,column=0)
+        self.subclip_dict_list_label.grid(row=1,column=0)
         self.export_video_button.grid(row = 2,column = 0)
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
@@ -160,11 +163,17 @@ class InitialWindow(tk.Tk):
 
     def on_export_video_button(self):
         print("lets Export")
-        if self.subclip_list == []:
+        if self.subclip_dict_list == []:
             self.export_video_button.config(text="Enter min 1 subclip",bg ="red")
             self.new_subclip_button.config(bg="red")
+
         else:
-            print("Do moviepy stuff")
+            for subclip in self.subclip_dict_list:
+                current_subclip = self.source_video_clip.subclip(subclip["start time"], subclip["end time"])
+                self.subclip_list.append(current_subclip)
+            print(self.subclip_list)
+            self.final_clip = concatenate_videoclips(self.subclip_list)
+            self.final_clip.write_videofile(self.export_video_name+".mp4")
 
 
     def on_tutorial_button(self):
@@ -172,13 +181,13 @@ class InitialWindow(tk.Tk):
 
 
     def on_subclip_close(self):
-        for subclip in self.subclip_list:
+        for subclip in self.subclip_dict_list:
             current_sublist = subclip
-            if  ("Clip number: " + subclip["subclip name"]) not in self.subclip_list_label_string:
-                self.subclip_list_label_string += "Clip number: " + subclip["subclip name"]
-                self.subclip_list_label_string += " strt: " + str(subclip["start time"])
-                self.subclip_list_label_string += " end: " + str(subclip["end time"]) + "\n"
-        self.subclip_list_label.config(text=self.subclip_list_label_string)
+            if  ("Clip number: " + subclip["subclip name"]) not in self.subclip_dict_list_label_string:
+                self.subclip_dict_list_label_string += "Clip number: " + subclip["subclip name"]
+                self.subclip_dict_list_label_string += " strt: " + str(subclip["start time"])
+                self.subclip_dict_list_label_string += " end: " + str(subclip["end time"]) + "\n"
+        self.subclip_dict_list_label.config(text=self.subclip_dict_list_label_string)
         print(self.subclip_list)
 
      
@@ -381,8 +390,8 @@ class SubclipWindow(tk.Toplevel):
 
             print("subclip created")
             
-            source_window.subclip_list.append(self.subclip_details_dict.copy())
-            print(source_window.subclip_list)
+            source_window.subclip_dict_list.append(self.subclip_details_dict.copy())
+            print(source_window.subclip_dict_list)
         else:
             self.subclip_info_label.config(text="Please enter valid times before creating clip",background='red')
 
