@@ -163,7 +163,7 @@ class InitialWindow(tk.Tk):
         self.export_video_name_label.config(text="Video Name: " +self.export_video_name)
 
     def on_export_video_button(self):
-        print("lets Export")
+        # print("lets Export")
         if self.subclip_dict_list == []:
             self.export_video_button.config(text="Enter min 1 subclip",bg ="red")
             self.new_subclip_button.config(bg="red")
