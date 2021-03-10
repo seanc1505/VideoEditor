@@ -1,6 +1,6 @@
 from re import sub
 import tkinter as tk
-from tkinter.constants import END, NE
+from tkinter.constants import END, LEFT, NE
 from tkinter import filedialog
 from typing import Text
 from datetime import date, datetime
@@ -13,9 +13,10 @@ from moviepy.video.compositing.concatenate import concatenate_videoclips
 
 
 class InitialWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self,tutorial_text_var):
         tk.Tk.__init__(self)
         # instantiate variables
+        self.tutorial_text = tutorial_text_var
         self.number_of_subclips = 0
         self.athlete_name="Athlete"
         self.session_type = "Flatwater"
@@ -171,16 +172,17 @@ class InitialWindow(tk.Tk):
         else:
             for subclip in self.subclip_dict_list:
                 subclip_source_video = subclip["source video"]
-                print(subclip_source_video)
+                
                 current_subclip = subclip_source_video.subclip(subclip["start time"], subclip["end time"])
                 self.subclip_list.append(current_subclip)
-            print(self.subclip_list)
+            
             self.final_clip = concatenate_videoclips(self.subclip_list)
             self.final_clip.write_videofile(self.export_video_name+".mp4")
 
 
     def on_tutorial_button(self):
         print("Display Tutorial")
+        self.tutorialwindow = TutorialWindow(source_window=self)
 
 
     def on_subclip_close(self):
@@ -375,7 +377,6 @@ class SubclipWindow(tk.Toplevel):
             print("subclip created")
             
             
-            print(source_window.subclip_dict_list)
             self.time_valid = False
         else:
             self.on_time_entry_button()
@@ -486,8 +487,27 @@ class SubclipWindow(tk.Toplevel):
         else:
             return True
 
+class TutorialWindow(tk.Toplevel):
+    def __init__(self,source_window):
+        tk.Toplevel.__init__(self,source_window)
+        self.tutorial_label = tk.Label(self, text=source_window.tutorial_text,justify=LEFT)
+        self.tutorial_label.pack()
+        self.close_tutorial_button = tk.Button(self, text="Done",background="orange", command=lambda: self.on_close_tutorial_button(source_window))
+        self.close_tutorial_button.pack()
 
-app = InitialWindow()
+
+    def on_close_tutorial_button(self,source_window):
+        self.destroy()
+
+tutorial_file = open("tutorial.txt","r")
+tutorial_text_list =  tutorial_file.readlines()
+tutorial_text_var = ""
+for line in tutorial_text_list:
+    # print(line)
+    tutorial_text_var += line
+    
+# print(tutorial_text_var)
+app = InitialWindow(tutorial_text_var)
 app.geometry("900x500")
 app.mainloop()
 
