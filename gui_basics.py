@@ -1,7 +1,7 @@
 from re import sub
 import tkinter as tk
 from tkinter.constants import END, LEFT, NE
-from tkinter import filedialog
+from tkinter import filedialog 
 from typing import Text
 from datetime import date, datetime
 from PIL import ImageTk, Image
@@ -176,7 +176,8 @@ class InitialWindow(tk.Tk):
                 self.subclip_list.append(current_subclip)
             
             self.final_clip = concatenate_videoclips(self.subclip_list)
-            self.final_clip.write_videofile(self.export_video_name+".mp4")
+            file_name = self.check_file_name(self.export_video_name)
+            self.final_clip.write_videofile(file_name)
 
 
     def on_tutorial_button(self):
@@ -216,6 +217,11 @@ class InitialWindow(tk.Tk):
             # subclip.number_of_subclips =self.number_of_subclips
             self.subclip.mainloop()
 
+    def check_file_name(self,user_file_name):
+        files = [('mp4', '*.mp4'),  
+             ('MOV', '*.mov')] 
+        file_name = filedialog.asksaveasfilename(filetypes = files, defaultextension = files,initialfile=user_file_name, initialdir =r"C:\Users\seanc\Videos")
+        return file_name
 
 
 
