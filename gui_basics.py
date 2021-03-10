@@ -292,28 +292,22 @@ class SubclipWindow(tk.Toplevel):
         # start time
         self.start_time_label.grid(row= 0,column=0,columnspan=4)
         self.start_time_entry_min.grid(row= 1,column=0)
-        self.start_time_entry_min.insert("1.0","0")
         self.start_time_label_min.grid(row= 1,column=1)
         self.start_time_entry_sec.grid(row= 1,column=2)
-        self.start_time_entry_sec.insert("1.0","0")
         self.start_time_label_sec.grid(row= 1,column=3)
         self.start_time_frame.grid(row=0,column=0)
         # duration time
         self.duration_time_label.grid(row= 0,column=4,columnspan=4)
         self.duration_time_entry_min.grid(row= 1,column=4)
-        self.duration_time_entry_min.insert("1.0","0")
         self.duration_time_label_min.grid(row= 1,column=5)
         self.duration_time_entry_sec.grid(row= 1,column=6)
-        self.duration_time_entry_sec.insert("1.0","0")
         self.duration_time_label_sec.grid(row= 1,column=7)
         self.duration_time_frame.grid(row=0,column=1)
         # end time
         self.end_time_label.grid(row= 0,column=8,columnspan=4)
         self.end_time_entry_min.grid(row= 1,column=8)
-        self.end_time_entry_min.insert("1.0","0")
         self.end_time_label_min.grid(row= 1,column=9)
         self.end_time_entry_sec.grid(row= 1,column=10)
-        self.end_time_entry_sec.insert("1.0","0")
         self.end_time_label_sec.grid(row= 1,column=11)
         self.end_time_frame.grid(row=0,column=2)     
         # Buttons
@@ -339,18 +333,12 @@ class SubclipWindow(tk.Toplevel):
     def on_time_entry_reset_button(self):
         self.subclip_info_label.config(text="Please Enter subclip information" ,background="SystemButtonFace")
         self.delete_time_entries()
-        self.end_time_entry_min.insert("1.0","0")
-        self.end_time_entry_sec.insert("1.0","0")
-        self.start_time_entry_min.insert("1.0","0")
-        self.start_time_entry_sec.insert("1.0","0")
-        self.duration_time_entry_min.insert("1.0","0")
-        self.duration_time_entry_sec.insert("1.0","0")
-        
+
     def on_time_entry_button(self):
         # when button is pressed get the data from time entry widgets
-        self.start_time = (float(self.start_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.start_time_entry_sec.get('1.0',"end-1c"))
-        self.duration = (float(self.duration_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.duration_time_entry_sec.get('1.0',"end-1c"))        
-        self.end_time = (float(self.end_time_entry_min.get('1.0',"end-1c"))*60)+ float(self.end_time_entry_sec.get('1.0',"end-1c"))
+        self.start_time = self.get_time(self.start_time_entry_min,self.start_time_entry_sec)
+        self.duration = self.get_time(self.duration_time_entry_min,self.duration_time_entry_sec)     
+        self.end_time = self.get_time(self.end_time_entry_min,self.end_time_entry_sec)
         # calculate the times/duration
         self.time_valid = self.calc_duration()
         if self.time_valid:
@@ -439,7 +427,7 @@ class SubclipWindow(tk.Toplevel):
             return False
         
         # ensures time is within limits 
-        if self.check_times() == False:
+        if self.check_times_valid() == False:
             return False
         else:
             self.subclip_info_label.config(text="Duration is within bounds",background='green')
@@ -460,13 +448,16 @@ class SubclipWindow(tk.Toplevel):
 
     def set_time_vals(self):
         # configures the time entries
-        self.start_time_entry_min.insert('1.0',str(self.start_time_min))
+        if self.start_time_min > 0:
+            self.start_time_entry_min.insert('1.0',str(self.start_time_min))
         self.start_time_entry_sec.insert('1.0',str(self.start_time_sec))
 
-        self.duration_time_entry_min.insert('1.0',str(self.duration_time_min))
+        if self.duration_time_min > 0:
+            self.duration_time_entry_min.insert('1.0',str(self.duration_time_min))
         self.duration_time_entry_sec.insert('1.0',str(self.duration_time_sec))
 
-        self.end_time_entry_min.insert('1.0',str(self.end_time_min))
+        if self.end_time_min > 0:
+            self.end_time_entry_min.insert('1.0',str(self.end_time_min))
         self.end_time_entry_sec.insert('1.0',str(self.end_time_sec))
 
     def delete_time_entries(self):
@@ -478,7 +469,21 @@ class SubclipWindow(tk.Toplevel):
         self.start_time_entry_min.delete('1.0',END)
         self.start_time_entry_sec.delete('1.0',END)
 
-    def check_times(self):
+    def get_time(self,minute_entry,second_entry):
+        minute = minute_entry.get('1.0',"end-1c")
+        second = second_entry.get('1.0',"end-1c")
+        if second == "":
+            second = 0
+        else:
+            second = float(second)
+        
+        if minute =="":
+            pass 
+        else:
+            second += float(minute)*60
+        return second
+
+    def check_times_valid(self):
         # checks times are within bounds
         if self.start_time <0 or self.duration <0 or self.end_time > self.clip_time:
             self.on_time_entry_reset_button()
