@@ -491,9 +491,3 @@ app = InitialWindow()
 app.geometry("900x500")
 app.mainloop()
 
-
-# if app.athlete_name == "":
-#             app.athlete_name = "Athlete"
-print(app.athlete_name)
-print(app.session_type)
-print(app.export_video_date)
