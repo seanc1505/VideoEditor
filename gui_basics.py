@@ -74,6 +74,7 @@ class InitialWindow(tk.Tk):
         # Subclip frame 
         self.new_subclip_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
         self.subclip_dict_list_label = tk.Label(self.new_subclip_frame, text= self.subclip_dict_list_label_string)
+        self.export_video_length_label = tk.Label(self.new_subclip_frame)
         # Export video name label
         self.export_video_name_label = tk.Label(self.export_video_details_frame,text = "Video Name: " +self.export_video_name)
         # Source video frame
@@ -94,7 +95,9 @@ class InitialWindow(tk.Tk):
         # subclip frame
         self.new_subclip_frame.grid(row=2,column=1,sticky="NW")
         self.subclip_dict_list_label.grid(row=1,column=0)
-        self.export_video_button.grid(row = 2,column = 0)
+        self.export_video_length_label.grid(row=2,column=0)
+        self.export_video_button.grid(row = 3,column = 0)
+        
         # Athlete name
         self.athlete_name_frame.grid(row=0,column=1)
         self.athlete_name_label.grid(row = 0,column = 0)
@@ -186,13 +189,16 @@ class InitialWindow(tk.Tk):
 
 
     def on_subclip_close(self):
+        export_video_duration = 0 
         for subclip in self.subclip_dict_list:
             current_sublist = subclip
+            export_video_duration += subclip["end time"] - subclip["start time"]
             if  ("Clip number: " + str(subclip["subclip name"])) not in self.subclip_dict_list_label_string:
                 self.subclip_dict_list_label_string += "Clip number: " + str(subclip["subclip name"])
                 self.subclip_dict_list_label_string += " strt: " + str(subclip["start time"])
                 self.subclip_dict_list_label_string += " end: " + str(subclip["end time"]) + "\n"
         self.subclip_dict_list_label.config(text=self.subclip_dict_list_label_string)
+        self.export_video_length_label.config(text ="Export video length = " + str(export_video_duration ))
 
      
     def on_new_subclip_button(self):
