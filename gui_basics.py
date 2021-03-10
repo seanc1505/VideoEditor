@@ -54,8 +54,6 @@ class InitialWindow(tk.Tk):
         
 
     def define_gui_components(self):
-        # Opening Label
-        self.title_greeting_label = tk.Label(text="Video Editing software V1")
         # Export video name details frame
         self.export_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=10,width=300)
         # Athlete name
@@ -88,8 +86,6 @@ class InitialWindow(tk.Tk):
 
 
     def place_gui_components(self):
-        # Opening Label
-        self.title_greeting_label.grid(row=0,column=0)
         # Export video name details frame
         self.export_video_details_frame.grid(row=1,column=0,columnspan=3)
         # subclip frame
@@ -114,7 +110,7 @@ class InitialWindow(tk.Tk):
         
         # Buttons
         self.export_video_name_button.grid(row = 1,column = 0,columnspan=2)
-        self.tutorial_button.grid(row=0,column=1)
+        self.tutorial_button.grid(row=3,column=3,sticky ="SW")
         self.new_subclip_button.grid(row=0,column=0,sticky="NW")
         self.new_source_video_button.grid(row=0,column=0)
         self.close_button.grid(row=5,column=1)
@@ -184,8 +180,9 @@ class InitialWindow(tk.Tk):
 
 
     def on_tutorial_button(self):
-        print("Display Tutorial")
         self.tutorialwindow = TutorialWindow(source_window=self)
+        self.tutorialwindow.title("Tutorial")
+        self.tutorialwindow.mainloop()
 
 
     def on_subclip_close(self):
@@ -212,6 +209,7 @@ class InitialWindow(tk.Tk):
             self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
         
             self.subclip = SubclipWindow(source_window=self)
+            self.subclip.title("Add Subclips")
             # subclip.focus
             # subclip.show
             self.subclip.geometry("500x400")
@@ -519,6 +517,7 @@ for line in tutorial_text_list:
     
 # print(tutorial_text_var)
 app = InitialWindow(tutorial_text_var)
+app.title("Video Editing software V1")
 app.geometry("900x500")
 app.mainloop()
 
