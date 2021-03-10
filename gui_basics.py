@@ -11,6 +11,7 @@ import math
 
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 
+
 class InitialWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -169,7 +170,9 @@ class InitialWindow(tk.Tk):
 
         else:
             for subclip in self.subclip_dict_list:
-                current_subclip = self.source_video_clip.subclip(subclip["start time"], subclip["end time"])
+                subclip_source_video = subclip["source video"]
+                print(subclip_source_video)
+                current_subclip = subclip_source_video.subclip(subclip["start time"], subclip["end time"])
                 self.subclip_list.append(current_subclip)
             print(self.subclip_list)
             self.final_clip = concatenate_videoclips(self.subclip_list)
@@ -405,6 +408,7 @@ class SubclipWindow(tk.Toplevel):
         self.subclip_details_label.config(text = self.subclip_details_label_text)
         self.clip_number_entry.delete(0,END)
         self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
+        self.subclip_details_dict["source video"] = source_window.source_video_clip
         if self.subclip_details_dict["subclip name"]>len(source_window.subclip_dict_list):
             source_window.subclip_dict_list.append(self.subclip_details_dict.copy())
         else:
