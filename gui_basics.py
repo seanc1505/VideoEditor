@@ -57,32 +57,32 @@ class InitialWindow(tk.Tk):
         # Opening Label
         self.title_greeting_label = tk.Label(text="Video Editing software V1")
         # Export video name details frame
-        self.export_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=10)
+        self.export_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=10,width=300)
         # Athlete name
-        self.athlete_name_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=150,height=75)
+        self.athlete_name_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.athlete_name_label= tk.Label(self.athlete_name_frame,text="Athlete Name: ")
         self.athlete_name_entry = tk.Entry(self.athlete_name_frame)
         # Date
-        self.video_date_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=150,height=75)
+        self.video_date_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.video_date_label= tk.Label(self.video_date_frame,text="Date: ")
         self.video_date_entry = tk.Entry(self.video_date_frame)
         
         # Session type
-        self.session_type_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=150,height=75)
+        self.session_type_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.session_type_label= tk.Label(self.session_type_frame,text="Session type: ")
         self.session_type_entry = tk.Entry(self.session_type_frame)
         # Subclip frame 
-        self.new_subclip_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
+        self.new_subclip_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=7)
         self.subclip_dict_list_label = tk.Label(self.new_subclip_frame, text= self.subclip_dict_list_label_string)
         self.export_video_length_label = tk.Label(self.new_subclip_frame)
         # Export video name label
         self.export_video_name_label = tk.Label(self.export_video_details_frame,text = "Video Name: " +self.export_video_name)
         # Source video frame
         self.source_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=5,width=150,height=150)
-        self.source_video_name_label = tk.Label(self.source_video_details_frame,text = self.source_video_name,borderwidth=5)
-        self.video_name_label = tk.Label(self.source_video_details_frame,text = "Video name:",borderwidth=5)
-        self.source_video_duration_label = tk.Label(self.source_video_details_frame,text = self.source_video_duration,borderwidth=5)
-        self.video_duration_label = tk.Label(self.source_video_details_frame,text = "Video duration:",borderwidth=5)
+        self.source_video_name_label = tk.Label(self.source_video_details_frame,text = self.source_video_name,borderwidth=7)
+        self.video_name_label = tk.Label(self.source_video_details_frame,text = "Video name:",borderwidth=7)
+        self.source_video_duration_label = tk.Label(self.source_video_details_frame,text = self.source_video_duration,borderwidth=7)
+        self.video_duration_label = tk.Label(self.source_video_details_frame,text = "Video duration:",borderwidth=7)
         self.source_video_duration_opening_frame_label = tk.Label(self.source_video_details_frame,text = "Select Source video")
 
 
@@ -91,7 +91,7 @@ class InitialWindow(tk.Tk):
         # Opening Label
         self.title_greeting_label.grid(row=0,column=0)
         # Export video name details frame
-        self.export_video_details_frame.grid(row=1,column=0,columnspan=6)
+        self.export_video_details_frame.grid(row=1,column=0,columnspan=3)
         # subclip frame
         self.new_subclip_frame.grid(row=2,column=1,sticky="NW")
         self.subclip_dict_list_label.grid(row=1,column=0)
@@ -99,18 +99,18 @@ class InitialWindow(tk.Tk):
         self.export_video_button.grid(row = 3,column = 0)
         
         # Athlete name
-        self.athlete_name_frame.grid(row=0,column=1)
+        self.athlete_name_frame.grid(row=0,column=0,sticky="W")
         self.athlete_name_label.grid(row = 0,column = 0)
         self.athlete_name_entry.grid(row = 0,column = 1)
         # Date
         self.video_date_label.grid(row = 0,column = 0)
         self.video_date_entry.grid(row = 0,column = 1)
-        self.video_date_frame.grid(row=0,column=0)
+        self.video_date_frame.grid(row=0,column=1,sticky="W")
         
         # Session type
         self.session_type_label.grid(row = 0,column = 0)
         self.session_type_entry.grid(row = 0,column = 1)
-        self.session_type_frame.grid(row=0,column=3)
+        self.session_type_frame.grid(row=0,column=2,sticky="W")
         
         # Buttons
         self.export_video_name_button.grid(row = 1,column = 0,columnspan=2)
@@ -120,7 +120,7 @@ class InitialWindow(tk.Tk):
         self.close_button.grid(row=5,column=1)
         
         # Export video name label
-        self.export_video_name_label.grid(row=1,column=3)
+        self.export_video_name_label.grid(row=1,column=1,columnspan=2,sticky ="E")
         
         # Source video frame
         self.video_name_label.grid(row=1,column=0)
@@ -238,7 +238,7 @@ class SubclipWindow(tk.Toplevel):
         self.subclip_details_dict = {}
     
         # Time Entry-Frame
-        self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
+        self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=7)
         self.define_subclip_gui_components()
         # Calculate time button
         self.time_entry_button = tk.Button(self.time_entry_frame, text="Calculate time", command= self.on_time_entry_button)
@@ -263,29 +263,29 @@ class SubclipWindow(tk.Toplevel):
         # start time
         self.start_time_frame = tk.Frame(self.time_entry_frame,relief=tk.RIDGE,borderwidth=1)
         self.start_time_label = tk.Label(self.start_time_frame,text="Start time")
-        self.start_time_entry_min = tk.Text(self.start_time_frame,width=3,height=1)
+        self.start_time_entry_min = tk.Entry(self.start_time_frame,width=7)
         self.start_time_label_min = tk.Label(self.start_time_frame,text="min")
-        self.start_time_entry_sec = tk.Text(self.start_time_frame,width=3,height=1)
+        self.start_time_entry_sec = tk.Entry(self.start_time_frame,width=7)
         self.start_time_label_sec = tk.Label(self.start_time_frame,text="sec")
         # Duration
         self.duration_time_frame = tk.Frame(self.time_entry_frame,relief=tk.RIDGE,borderwidth=1)    
         self.duration_time_label = tk.Label(self.duration_time_frame,text="Clip duration")
-        self.duration_time_entry_min = tk.Text(self.duration_time_frame,width=3,height=1)
+        self.duration_time_entry_min = tk.Entry(self.duration_time_frame,width=7)
         self.duration_time_label_min = tk.Label(self.duration_time_frame,text="min")
-        self.duration_time_entry_sec = tk.Text(self.duration_time_frame,width=3,height=1)
+        self.duration_time_entry_sec = tk.Entry(self.duration_time_frame,width=7)
         self.duration_time_label_sec = tk.Label(self.duration_time_frame,text="sec")
         # End time
         self.end_time_frame = tk.Frame(self.time_entry_frame,relief=tk.RIDGE,borderwidth=1)
         self.end_time_label = tk.Label(self.end_time_frame,text="End time")
-        self.end_time_entry_min = tk.Text(self.end_time_frame,width=3,height=1)
+        self.end_time_entry_min = tk.Entry(self.end_time_frame,width=7)
         self.end_time_label_min = tk.Label(self.end_time_frame,text="min")
-        self.end_time_entry_sec = tk.Text(self.end_time_frame,width=3,height=1)
+        self.end_time_entry_sec = tk.Entry(self.end_time_frame,width=7)
         self.end_time_label_sec = tk.Label(self.end_time_frame,text="sec")
         # Start and end frame labels
         self.start_frame_label = tk.Label(self, text="Start frame")
         self.end_frame_label = tk.Label(self, text="End frame")
         # Subclip number section
-        self.subclip_details_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5)
+        self.subclip_details_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=7)
         self.clip_number_label = tk.Label(self.subclip_details_frame,text="Current Subclip number")
         self.clip_number_entry = tk.Entry(self.subclip_details_frame)
 
@@ -455,29 +455,29 @@ class SubclipWindow(tk.Toplevel):
     def set_time_vals(self):
         # configures the time entries
         if self.start_time_min > 0:
-            self.start_time_entry_min.insert('1.0',str(self.start_time_min))
-        self.start_time_entry_sec.insert('1.0',str(self.start_time_sec))
+            self.start_time_entry_min.insert(0,str(self.start_time_min))
+        self.start_time_entry_sec.insert(0,str(self.start_time_sec))
 
         if self.duration_time_min > 0:
-            self.duration_time_entry_min.insert('1.0',str(self.duration_time_min))
-        self.duration_time_entry_sec.insert('1.0',str(self.duration_time_sec))
+            self.duration_time_entry_min.insert(0,str(self.duration_time_min))
+        self.duration_time_entry_sec.insert(0,str(self.duration_time_sec))
 
         if self.end_time_min > 0:
-            self.end_time_entry_min.insert('1.0',str(self.end_time_min))
-        self.end_time_entry_sec.insert('1.0',str(self.end_time_sec))
+            self.end_time_entry_min.insert(0,str(self.end_time_min))
+        self.end_time_entry_sec.insert(0,str(self.end_time_sec))
 
     def delete_time_entries(self):
         # clears the time entries
-        self.duration_time_entry_min.delete('1.0',END)
-        self.duration_time_entry_sec.delete('1.0',END)
-        self.end_time_entry_min.delete('1.0',END)
-        self.end_time_entry_sec.delete('1.0',END)
-        self.start_time_entry_min.delete('1.0',END)
-        self.start_time_entry_sec.delete('1.0',END)
+        self.duration_time_entry_min.delete(0,END)
+        self.duration_time_entry_sec.delete(0,END)
+        self.end_time_entry_min.delete(0,END)
+        self.end_time_entry_sec.delete(0,END)
+        self.start_time_entry_min.delete(0,END)
+        self.start_time_entry_sec.delete(0,END)
 
     def get_time(self,minute_entry,second_entry):
-        minute = minute_entry.get('1.0',"end-1c")
-        second = second_entry.get('1.0',"end-1c")
+        minute = minute_entry.get()
+        second = second_entry.get()
         if second == "":
             second = 0
         else:
