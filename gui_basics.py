@@ -165,7 +165,6 @@ class InitialWindow(tk.Tk):
         self.destroy()
 
     def on_settings_button(self):
-        print("open settings")
         self.settingswindow = SettingsWindow(source_window=self)
         self.settingswindow.title("Settings")
         self.settingswindow.mainloop()
@@ -184,7 +183,7 @@ class InitialWindow(tk.Tk):
         self.source_video_clip =  moviepy.VideoFileClip(self.source_video_name)
         # calc duration of source clip
         self.source_video_duration = self.source_video_clip.duration
-        self.source_video_duration_label.config(text=self.source_video_duration)
+        self.source_video_duration_label.config(text= self.create_time_string(self.source_video_duration))
         # Show first frame
         self.source_video_image_array = self.source_video_clip.get_frame(0) 
         self.source_video_image_location = Image.fromarray(self.source_video_image_array)
@@ -203,7 +202,6 @@ class InitialWindow(tk.Tk):
         self.export_video_name_label.config(text="Video Name: " +self.export_video_name)
 
     def on_export_video_button(self):
-        # print("lets Export")
         if self.subclip_dict_list == []:
             self.export_video_button.config(text="Enter min 1 subclip",bg ="red")
             self.new_subclip_button.config(bg="red")
@@ -233,10 +231,10 @@ class InitialWindow(tk.Tk):
             export_video_duration += subclip["end time"] - subclip["start time"]
             if  ("Clip number: " + str(subclip["subclip name"])) not in self.subclip_dict_list_label_string:
                 self.subclip_dict_list_label_string += "Clip number: " + str(subclip["subclip name"])
-                self.subclip_dict_list_label_string += " strt: " + str(subclip["start time"])
-                self.subclip_dict_list_label_string += " end: " + str(subclip["end time"]) + "\n"
+                self.subclip_dict_list_label_string += " strt: " + self.create_time_string(subclip["start time"])
+                self.subclip_dict_list_label_string += " end: " + self.create_time_string(subclip["end time"]) + "\n"
         self.subclip_dict_list_label.config(text=self.subclip_dict_list_label_string)
-        self.export_video_length_label.config(text ="Export video length = " + str(export_video_duration ))
+        self.export_video_length_label.config(text ="Export video length = " +self.create_time_string(export_video_duration))
 
      
     def on_new_subclip_button(self):
@@ -263,7 +261,9 @@ class InitialWindow(tk.Tk):
         file_name = filedialog.asksaveasfilename(filetypes = files, defaultextension = files,initialfile=user_file_name, initialdir = self.export_video_default_dir)
         return file_name
 
-
+    def create_time_string(self,seconds):
+        time_string = str(math.floor(seconds/60)) +":"+str(round(seconds%60,2)) + "\n"
+        return time_string
 
 
 
@@ -413,7 +413,6 @@ class SubclipWindow(tk.Toplevel):
             # self.end_frame_image_array = self.source_video.get_frame((self.end_time-.08)) 
             self.subclip_save(source_window)
 
-            # print(self.subclip_details_dict)
             print("subclip created")
             
             
@@ -445,7 +444,9 @@ class SubclipWindow(tk.Toplevel):
         self.number_of_subclips +=1
         self.subclip_name = int(self.clip_number_entry.get())
         self.subclip_details_dict["subclip name"] = self.subclip_name
-        self.subclip_details_label_text = self.subclip_details_label_text +"\n Subclip : " +  str(self.subclip_details_dict["subclip name"]) + " Start Time: " +str(self.subclip_details_dict["start time"])+" End Time: "+str(self.subclip_details_dict["end time"])
+        self.subclip_details_label_text += "\n Subclip: " +  str(self.subclip_details_dict["subclip name"]) + " Start Time: " 
+        self.subclip_details_label_text += source_window.create_time_string(self.subclip_details_dict["start time"])
+        self.subclip_details_label_text += " End Time: "+ source_window.create_time_string(self.subclip_details_dict["end time"])
         self.subclip_details_label.config(text = self.subclip_details_label_text)
         self.clip_number_entry.delete(0,END)
         self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
@@ -572,9 +573,11 @@ class SettingsWindow(tk.Toplevel):
     def on_reset_defaults_button(self):
         if os.path.exists("user_default.json"):
             os.remove("user_default.json")
-        print("reset")
 
     def on_close_defaults_button(self,source_window):
+        source_window.configure_gui()
+        source_window.delete_entry_variables()
+        source_window.insert_intial_variables()
         self.destroy()
 
     def on_save_defaults_button(self,source_window):
@@ -592,7 +595,6 @@ class SettingsWindow(tk.Toplevel):
         # self.export_default_dir
         with open("user_default.json", "w") as write_file:
             json.dump(source_window.default_dict, write_file)
-        print("Save")
         source_window.configure_gui()
         source_window.delete_entry_variables()
         source_window.insert_intial_variables()
@@ -601,7 +603,7 @@ class SettingsWindow(tk.Toplevel):
     def on_source_video_default_dir_button(self):
         self.source_default_dir = filedialog.askdirectory()
         self.source_video_default_dir_label.config(text = self.source_default_dir)
-        # print("finding source direcrory")
+
 
     def on_export_video_default_dir_button(self):
         self.export_default_dir = filedialog.askdirectory()
@@ -685,10 +687,8 @@ tutorial_file = open("tutorial.txt","r")
 tutorial_text_list =  tutorial_file.readlines()
 tutorial_text_var = ""
 for line in tutorial_text_list:
-    # print(line)
     tutorial_text_var += line
     
-# print(tutorial_text_var)
 app = InitialWindow(tutorial_text_var)
 app.title("Video Editing software V1")
 app.geometry("900x500")
