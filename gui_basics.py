@@ -8,8 +8,9 @@ from PIL import ImageTk, Image
 import moviepy  
 from moviepy.editor import *
 import math, json
-
+import os
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+from numpy import insert, source
 
 
 class InitialWindow(tk.Tk):
@@ -17,24 +18,19 @@ class InitialWindow(tk.Tk):
         tk.Tk.__init__(self)
         # instantiate variables
         # Make this if user defined defualt file exists
-        future = True
-        if future:
+        if os.path.exists("user_default.json"):
+            with open("user_default.json", "r") as read_file:
+                self.default_dict = json.load(read_file)
+        else:
             with open("default.json", "r") as read_file:
                 self.default_dict = json.load(read_file)
-            print(self.default_dict)
+            
         self.tutorial_text = tutorial_text_var
         self.number_of_subclips = 0
-        self.athlete_name= self.default_dict["athlete_name"]
-        self.session_type = self.default_dict["session_type"]
-        self.source_video_default_dir = self.default_dict["source_video_default_dir"]
-        self.export_video_default_dir = self.default_dict["export_video_default_dir"]
         self.source_video_name = "Select clip"
-        if self.default_dict["date"] == None:
-            self.export_video_date = datetime.today().strftime('%Y_%m_%d')
-            self.export_video_date = self.export_video_date[2:]
-        else: 
-            self.export_video_date = self.default_dict["date"]
-        self.export_video_name = self.export_video_date + "_" +self.athlete_name+"_" + self.session_type
+        
+        
+        
         self.source_video_clip = None
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
@@ -42,10 +38,9 @@ class InitialWindow(tk.Tk):
         self.subclip_dict_list = []
         self.subclip_list = []
         
+        self.configure_gui()
         self.define_gui_components()
-        self.video_date_entry.insert(0, self.export_video_date)
-        self.session_type_entry.insert(0, self.session_type)
-        self.athlete_name_entry.insert(0,self.athlete_name)
+        self.insert_intial_variables()
 
         # Export Name Set
         self.export_video_name_button = tk.Button(self.export_video_details_frame, text="Export name Set", command=self.on_export_video_name_button)
@@ -58,7 +53,7 @@ class InitialWindow(tk.Tk):
         # New source video button
         self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
         # settings button
-        self.settings_button = tk.Button(self, text = "Settings", background= "orange", command= self.on_settings_button)
+        self.settings_button = tk.Button(self, text = "Settings", background= "orange", command=  self.on_settings_button)
         # Export clips Button 
         self.export_video_button = tk.Button(self.new_subclip_frame,text="Export the videos", command= self.on_export_video_button)
        
@@ -142,6 +137,30 @@ class InitialWindow(tk.Tk):
         self.source_video_duration_opening_frame_label.grid(row=3,column=0)
         self.source_video_details_frame.grid(row=2,column=0,sticky="NW")
 
+    def configure_gui(self):
+        self.athlete_name= self.default_dict["athlete_name"]
+        self.session_type = self.default_dict["session_type"]
+        self.source_video_default_dir = self.default_dict["source_video_default_dir"]
+        self.export_video_default_dir = self.default_dict["export_video_default_dir"]
+        self.default_clip_duration = self.default_dict["default_clip_duration"]
+        if self.default_dict["date"] == None:
+            self.export_video_date = datetime.today().strftime('%Y_%m_%d')
+            self.export_video_date = self.export_video_date[2:]
+        else: 
+            self.export_video_date = self.default_dict["date"]
+        self.export_video_name = self.export_video_date + "_" +self.athlete_name+"_" + self.session_type
+        
+
+    def insert_intial_variables(self):
+        self.video_date_entry.insert(0, self.export_video_date)
+        self.session_type_entry.insert(0, self.session_type)
+        self.athlete_name_entry.insert(0,self.athlete_name)
+    
+    def delete_entry_variables(self):
+        self.video_date_entry.delete(0,END)
+        self.session_type_entry.delete(0,END)
+        self.athlete_name_entry.delete(0,END)
+
     def on_close_button(self):
         self.destroy()
 
@@ -153,7 +172,7 @@ class InitialWindow(tk.Tk):
 
     def on_new_source_video_button(self):
         # Find source clip file name
-        self.source_video_name = filedialog.askopenfilename()
+        self.source_video_name = filedialog.askopenfilename(initialdir = self.source_video_default_dir)
         if len(self.source_video_name) >50:
             length = int(math.floor(len(self.source_video_name)/2))
             first_half = self.source_video_name[:(length)]
@@ -241,7 +260,7 @@ class InitialWindow(tk.Tk):
     def check_file_name(self,user_file_name):
         files = [('mp4', '*.mp4'),  
              ('MOV', '*.mov')] 
-        file_name = filedialog.asksaveasfilename(filetypes = files, defaultextension = files,initialfile=user_file_name, initialdir =r"C:\Users\seanc\Videos")
+        file_name = filedialog.asksaveasfilename(filetypes = files, defaultextension = files,initialfile=user_file_name, initialdir = self.export_video_default_dir)
         return file_name
 
 
@@ -264,7 +283,7 @@ class SubclipWindow(tk.Toplevel):
     
         # Time Entry-Frame
         self.time_entry_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=7)
-        self.define_subclip_gui_components()
+        self.define_subclip_gui_components(source_window)
         # Calculate time button
         self.time_entry_button = tk.Button(self.time_entry_frame, text="Calculate time", command= self.on_time_entry_button)
         # Reset time button
@@ -283,7 +302,7 @@ class SubclipWindow(tk.Toplevel):
         source_window.on_subclip_close()
         self.destroy()
 
-    def define_subclip_gui_components(self):      
+    def define_subclip_gui_components(self,source_window):      
         self.subclip_info_label = tk.Label(self,text="Please Enter subclip information")
         # start time
         self.start_time_frame = tk.Frame(self.time_entry_frame,relief=tk.RIDGE,borderwidth=1)
@@ -298,6 +317,8 @@ class SubclipWindow(tk.Toplevel):
         self.duration_time_entry_min = tk.Entry(self.duration_time_frame,width=7)
         self.duration_time_label_min = tk.Label(self.duration_time_frame,text="min")
         self.duration_time_entry_sec = tk.Entry(self.duration_time_frame,width=7)
+        if source_window.default_clip_duration != None:
+            self.duration_time_entry_sec.insert(0,source_window.default_clip_duration)
         self.duration_time_label_sec = tk.Label(self.duration_time_frame,text="sec")
         # End time
         self.end_time_frame = tk.Frame(self.time_entry_frame,relief=tk.RIDGE,borderwidth=1)
@@ -540,42 +561,90 @@ class SettingsWindow(tk.Toplevel):
         tk.Toplevel.__init__(self,source_window)
         self.grab_set()
         self.focus_set()
-        self.define_default_gui_components()
+        self.source_default_dir = source_window.source_video_default_dir
+        self.export_default_dir = source_window.export_video_default_dir
+        self.define_default_gui_components(source_window)
         self.reset_defaults_button = tk.Button(self.close_buttons_frame,text= "Reset Defaults", background="red" , command= self.on_reset_defaults_button)
-        self.save_defaults_button = tk.Button(self.close_buttons_frame,text= "Save Defaults", background="Green" , command= self.on_save_defaults_button)
+        self.save_defaults_button = tk.Button(self.close_buttons_frame,text= "Save Defaults", background="Green" , command= lambda: self.on_save_defaults_button(source_window))
+        self.close_defaults_button = tk.Button(self.close_buttons_frame,text= "Close", background="orange" , command= lambda: self.on_close_defaults_button(source_window) )
         self.place_default_gui_components()
 
     def on_reset_defaults_button(self):
+        if os.path.exists("user_default.json"):
+            os.remove("user_default.json")
         print("reset")
-        self.destroy()
-    def on_save_defaults_button(self):
-        future = False
-        if future:
-            data = {"empty":True}
-            with open("user_default.json", "w") as write_file:
-                json.dump(data, write_file)
-        print("Save")
+
+    def on_close_defaults_button(self,source_window):
         self.destroy()
 
-    def define_default_gui_components(self):
+    def on_save_defaults_button(self,source_window):
+        self.default_athlete = self.athlete_name_entry.get()
+        self.default_date = self.video_date_entry.get()
+        self.default_session_type =self.session_type_entry.get()
+        self.default_duration =self.duration_default_entry.get()
+        source_window.default_dict["athlete_name"] = self.default_athlete
+        source_window.default_dict["date"] = self.default_date
+        source_window.default_dict["session_type"] = self.default_session_type
+        source_window.default_dict["default_clip_duration"] = self.default_duration
+        source_window.default_dict["source_video_default_dir"] = self.source_default_dir
+        source_window.default_dict["export_video_default_dir"] = self.export_default_dir
+        # self.source_default_dir
+        # self.export_default_dir
+        with open("user_default.json", "w") as write_file:
+            json.dump(source_window.default_dict, write_file)
+        print("Save")
+        source_window.configure_gui()
+        source_window.delete_entry_variables()
+        source_window.insert_intial_variables()
+        self.destroy()
+
+    def on_source_video_default_dir_button(self):
+        self.source_default_dir = filedialog.askdirectory()
+        self.source_video_default_dir_label.config(text = self.source_default_dir)
+        # print("finding source direcrory")
+
+    def on_export_video_default_dir_button(self):
+        self.export_default_dir = filedialog.askdirectory()
+        self.export_video_default_dir_label.config(text = self.export_default_dir)
+    
+
+    def define_default_gui_components(self,source_window):
         self.close_buttons_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=10,width=300)
         self.video_details_default_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=10,width=300)
+        self.directory_default_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         # Athlete name
         self.athlete_name_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.athlete_name_label= tk.Label(self.athlete_name_default_frame,text="Athlete Name: ")
         self.athlete_name_entry = tk.Entry(self.athlete_name_default_frame)
+        self.athlete_name_entry.insert(0,source_window.athlete_name)
         # Date
         self.video_date_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.video_date_label= tk.Label(self.video_date_default_frame,text="Date: ")
         self.video_date_entry = tk.Entry(self.video_date_default_frame)
-        
+        self.video_date_entry.insert(0,source_window.export_video_date)
         # Session type
         self.session_type_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.session_type_label= tk.Label(self.session_type_default_frame,text="Session type: ")
         self.session_type_entry = tk.Entry(self.session_type_default_frame)
-
+        self.session_type_entry.insert(0,source_window.session_type)
+        # default duration
+        self.duration_default_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
+        self.duration_default_label = tk.Label(self.duration_default_frame,text = "Default Clip Duration: ")
+        self.duration_default_entry = tk.Entry(self.duration_default_frame,width=5)
+        self.duration_default_label_sec = tk.Label(self.duration_default_frame,text = "seconds ")
+        if source_window.default_clip_duration != None:
+            self.duration_default_entry.insert(0,source_window.default_clip_duration)
+        # Source_directory default 
+        self.source_video_default_dir_label = tk.Label(self.directory_default_frame,text = source_window.source_video_default_dir)
+        self.export_video_default_dir_label = tk.Label(self.directory_default_frame,text = source_window.export_video_default_dir)
+        self.source_video_default_dir_label_id = tk.Label(self.directory_default_frame,text = "Source video directory:   ")
+        self.export_video_default_dir_label_id = tk.Label(self.directory_default_frame,text = "Export video directory:   ")
+        self.source_video_default_dir_button = tk.Button(self.directory_default_frame,text= "Select default source folder" , command= self.on_source_video_default_dir_button)
+        self.export_video_default_dir_button = tk.Button(self.directory_default_frame,text= "Select default save folder" , command= self.on_export_video_default_dir_button)
+    
+    
     def place_default_gui_components(self):
-        # Export video name details frame
+        # Export video name details defaults frame
         self.video_details_default_frame.grid(row=0,column=0,columnspan=3)
         # Athlete name
         self.athlete_name_default_frame.grid(row=0,column=0,sticky="W")
@@ -590,10 +659,25 @@ class SettingsWindow(tk.Toplevel):
         self.session_type_label.grid(row = 0,column = 0)
         self.session_type_entry.grid(row = 0,column = 1)
         self.session_type_default_frame.grid(row=0,column=2,sticky="W")
+        
+        #duration
+        self.duration_default_label.grid(row=0,column=0)
+        self.duration_default_entry.grid(row=0,column=1)
+        self.duration_default_label_sec.grid(row=0,column=2)
+        self.duration_default_frame.grid(row =1,sticky="W") 
+        # Directorys
+        self.source_video_default_dir_label_id.grid(row=0,column=0)
+        self.export_video_default_dir_label_id.grid(row=1,column=0)
+        self.source_video_default_dir_label.grid(row=0,column=1)
+        self.export_video_default_dir_label.grid(row=1,column=1)
+        self.directory_default_frame.grid(row=2,sticky="W")
 
+        self.source_video_default_dir_button.grid(row=0,column =2)
+        self.export_video_default_dir_button.grid(row=1,column =2)
         self.reset_defaults_button.grid(row=0,column=1)
         self.save_defaults_button.grid(row=0,column=0)
-        self.close_buttons_frame.grid(row=2)
+        self.close_defaults_button.grid(row=0,column=2)
+        self.close_buttons_frame.grid(row=3)
 
 
 
