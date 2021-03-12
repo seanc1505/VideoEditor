@@ -7,7 +7,7 @@ from datetime import date, datetime
 from PIL import ImageTk, Image
 import moviepy  
 from moviepy.editor import *
-import math
+import math, json
 
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 
@@ -16,15 +16,26 @@ class InitialWindow(tk.Tk):
     def __init__(self,tutorial_text_var):
         tk.Tk.__init__(self)
         # instantiate variables
+        # Make this if user defined defualt file exists
+        future = True
+        if future:
+            with open("default.json", "r") as read_file:
+                self.default_dict = json.load(read_file)
+            print(self.default_dict)
         self.tutorial_text = tutorial_text_var
         self.number_of_subclips = 0
-        self.athlete_name="Athlete"
-        self.session_type = "Flatwater"
+        self.athlete_name= self.default_dict["athlete_name"]
+        self.session_type = self.default_dict["session_type"]
+        self.source_video_default_dir = self.default_dict["source_video_default_dir"]
+        self.export_video_default_dir = self.default_dict["export_video_default_dir"]
         self.source_video_name = "Select clip"
-        self.export_video_date = datetime.today().strftime('%Y_%m_%d')
-        self.export_video_date = self.export_video_date[2:]
-        self.export_video_name = self.export_video_date + "_undefined_" + self.session_type
-        self.source_video_clip = "undefined"
+        if self.default_dict["date"] == None:
+            self.export_video_date = datetime.today().strftime('%Y_%m_%d')
+            self.export_video_date = self.export_video_date[2:]
+        else: 
+            self.export_video_date = self.default_dict["date"]
+        self.export_video_name = self.export_video_date + "_" +self.athlete_name+"_" + self.session_type
+        self.source_video_clip = None
         self.source_video_duration = "Select clip"
         self.source_video_duration_opening_frame = "Select clip"
         self.subclip_dict_list_label_string = "Subclip List: \n"
@@ -34,6 +45,7 @@ class InitialWindow(tk.Tk):
         self.define_gui_components()
         self.video_date_entry.insert(0, self.export_video_date)
         self.session_type_entry.insert(0, self.session_type)
+        self.athlete_name_entry.insert(0,self.athlete_name)
 
         # Export Name Set
         self.export_video_name_button = tk.Button(self.export_video_details_frame, text="Export name Set", command=self.on_export_video_name_button)
@@ -45,6 +57,8 @@ class InitialWindow(tk.Tk):
         self.new_subclip_button = tk.Button(self.new_subclip_frame,text="New Subclip",command=self.on_new_subclip_button)
         # New source video button
         self.new_source_video_button = tk.Button(self.source_video_details_frame, text="New source video",background="green",font='Helvetica 12 bold', command=self.on_new_source_video_button)
+        # settings button
+        self.settings_button = tk.Button(self, text = "Settings", background= "orange", command= self.on_settings_button)
         # Export clips Button 
         self.export_video_button = tk.Button(self.new_subclip_frame,text="Export the videos", command= self.on_export_video_button)
        
@@ -55,7 +69,7 @@ class InitialWindow(tk.Tk):
 
     def define_gui_components(self):
         # Export video name details frame
-        self.export_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=10,width=300)
+        self.export_video_details_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=10,width=300)
         # Athlete name
         self.athlete_name_frame = tk.Frame(self.export_video_details_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
         self.athlete_name_label= tk.Label(self.athlete_name_frame,text="Athlete Name: ")
@@ -76,7 +90,7 @@ class InitialWindow(tk.Tk):
         # Export video name label
         self.export_video_name_label = tk.Label(self.export_video_details_frame,text = "Video Name: " +self.export_video_name)
         # Source video frame
-        self.source_video_details_frame = tk.Frame(relief=tk.RIDGE,borderwidth=5,width=150,height=150)
+        self.source_video_details_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=5,width=150,height=150)
         self.source_video_name_label = tk.Label(self.source_video_details_frame,text = self.source_video_name,borderwidth=7)
         self.video_name_label = tk.Label(self.source_video_details_frame,text = "Video name:",borderwidth=7)
         self.source_video_duration_label = tk.Label(self.source_video_details_frame,text = self.source_video_duration,borderwidth=7)
@@ -111,9 +125,11 @@ class InitialWindow(tk.Tk):
         # Buttons
         self.export_video_name_button.grid(row = 1,column = 0,columnspan=2)
         self.tutorial_button.grid(row=3,column=3,sticky ="SW")
+        self.settings_button.grid(row=2,column= 3)
         self.new_subclip_button.grid(row=0,column=0,sticky="NW")
         self.new_source_video_button.grid(row=0,column=0)
         self.close_button.grid(row=5,column=1)
+
         
         # Export video name label
         self.export_video_name_label.grid(row=1,column=1,columnspan=2,sticky ="E")
@@ -129,6 +145,11 @@ class InitialWindow(tk.Tk):
     def on_close_button(self):
         self.destroy()
 
+    def on_settings_button(self):
+        print("open settings")
+        self.settingswindow = SettingsWindow(source_window=self)
+        self.settingswindow.title("Settings")
+        self.settingswindow.mainloop()
 
     def on_new_source_video_button(self):
         # Find source clip file name
@@ -200,7 +221,7 @@ class InitialWindow(tk.Tk):
 
      
     def on_new_subclip_button(self):
-        if self.source_video_clip == "undefined":
+        if self.source_video_clip == None:
             self.new_source_video_button.config(text="Set Source video first",bg="red")
             self.new_subclip_button.config(text="Set Source video first",bg="red")
         else:
@@ -231,7 +252,7 @@ class InitialWindow(tk.Tk):
 class SubclipWindow(tk.Toplevel):
     def __init__(self,source_window):
         tk.Toplevel.__init__(self,source_window)
-        
+        self.grab_set()
         # Variable set up
         self.number_of_subclips = source_window.number_of_subclips
         self.source_video = source_window.source_video_clip
@@ -513,6 +534,68 @@ class TutorialWindow(tk.Toplevel):
 
     def on_close_tutorial_button(self,source_window):
         self.destroy()
+
+class SettingsWindow(tk.Toplevel):
+    def __init__(self,source_window):
+        tk.Toplevel.__init__(self,source_window)
+        self.grab_set()
+        self.focus_set()
+        self.define_default_gui_components()
+        self.reset_defaults_button = tk.Button(self.close_buttons_frame,text= "Reset Defaults", background="red" , command= self.on_reset_defaults_button)
+        self.save_defaults_button = tk.Button(self.close_buttons_frame,text= "Save Defaults", background="Green" , command= self.on_save_defaults_button)
+        self.place_default_gui_components()
+
+    def on_reset_defaults_button(self):
+        print("reset")
+        self.destroy()
+    def on_save_defaults_button(self):
+        future = False
+        if future:
+            data = {"empty":True}
+            with open("user_default.json", "w") as write_file:
+                json.dump(data, write_file)
+        print("Save")
+        self.destroy()
+
+    def define_default_gui_components(self):
+        self.close_buttons_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=10,width=300)
+        self.video_details_default_frame = tk.Frame(self,relief=tk.RIDGE,borderwidth=10,width=300)
+        # Athlete name
+        self.athlete_name_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
+        self.athlete_name_label= tk.Label(self.athlete_name_default_frame,text="Athlete Name: ")
+        self.athlete_name_entry = tk.Entry(self.athlete_name_default_frame)
+        # Date
+        self.video_date_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
+        self.video_date_label= tk.Label(self.video_date_default_frame,text="Date: ")
+        self.video_date_entry = tk.Entry(self.video_date_default_frame)
+        
+        # Session type
+        self.session_type_default_frame = tk.Frame(self.video_details_default_frame,relief=tk.RIDGE,borderwidth=5,width=100,height=75)
+        self.session_type_label= tk.Label(self.session_type_default_frame,text="Session type: ")
+        self.session_type_entry = tk.Entry(self.session_type_default_frame)
+
+    def place_default_gui_components(self):
+        # Export video name details frame
+        self.video_details_default_frame.grid(row=0,column=0,columnspan=3)
+        # Athlete name
+        self.athlete_name_default_frame.grid(row=0,column=0,sticky="W")
+        self.athlete_name_label.grid(row = 0,column = 0)
+        self.athlete_name_entry.grid(row = 0,column = 1)
+        # Date
+        self.video_date_label.grid(row = 0,column = 0)
+        self.video_date_entry.grid(row = 0,column = 1)
+        self.video_date_default_frame.grid(row=0,column=1,sticky="W")
+        
+        # Session type
+        self.session_type_label.grid(row = 0,column = 0)
+        self.session_type_entry.grid(row = 0,column = 1)
+        self.session_type_default_frame.grid(row=0,column=2,sticky="W")
+
+        self.reset_defaults_button.grid(row=0,column=1)
+        self.save_defaults_button.grid(row=0,column=0)
+        self.close_buttons_frame.grid(row=2)
+
+
 
 tutorial_file = open("tutorial.txt","r")
 tutorial_text_list =  tutorial_file.readlines()

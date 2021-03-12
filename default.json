@@ -1,0 +1,8 @@
+{
+    "athlete_name": "Undefined",
+    "session_type": "Flatwater",
+    "source_video_default_dir": "./",
+    "export_video_default_dir": "./",
+    "date":null,
+    "default_clip_duration": null
+}
