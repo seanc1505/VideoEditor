@@ -582,7 +582,10 @@ class SettingsWindow(tk.Toplevel):
 
     def on_save_defaults_button(self,source_window):
         self.default_athlete = self.athlete_name_entry.get()
-        self.default_date = self.video_date_entry.get()
+        if self.video_date_entry.get() != source_window.export_video_date:
+            self.default_date = self.video_date_entry.get()
+        else:
+            self.default_date = None
         self.default_session_type =self.session_type_entry.get()
         self.default_duration =self.duration_default_entry.get()
         source_window.default_dict["athlete_name"] = self.default_athlete
