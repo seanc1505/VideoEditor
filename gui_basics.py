@@ -14,7 +14,7 @@ from numpy import insert, source
 
 
 class InitialWindow(tk.Tk):
-    def __init__(self,tutorial_text_var):
+    def __init__(self):
         tk.Tk.__init__(self)
         # instantiate variables
         # Make this if user defined defualt file exists
@@ -25,7 +25,7 @@ class InitialWindow(tk.Tk):
             with open("default.json", "r") as read_file:
                 self.default_dict = json.load(read_file)
             
-        self.tutorial_text = tutorial_text_var
+        self.tutorial_text = self.default_dict["tutorial_text"]
         self.number_of_subclips = 0
         self.source_video_name = "Select clip"
         
@@ -172,7 +172,10 @@ class InitialWindow(tk.Tk):
     def on_new_source_video_button(self):
         # Find source clip file name
         self.source_video_name = filedialog.askopenfilename(initialdir = self.source_video_default_dir)
-        if len(self.source_video_name) >50:
+        if self.source_video_name == "":
+            self.new_source_video_button.config(text="Set Source video first",bg="red")
+            return
+        elif len(self.source_video_name) >50:
             length = int(math.floor(len(self.source_video_name)/2))
             first_half = self.source_video_name[:(length)]
             second_half = self.source_video_name[(length):]
@@ -262,7 +265,7 @@ class InitialWindow(tk.Tk):
         return file_name
 
     def create_time_string(self,seconds):
-        time_string = str(math.floor(seconds/60)) +":"+str(round(seconds%60,2)) + "\n"
+        time_string = str(math.floor(seconds/60)) +":"+str(round(seconds%60,2))
         return time_string
 
 
@@ -594,6 +597,7 @@ class SettingsWindow(tk.Toplevel):
         source_window.default_dict["default_clip_duration"] = self.default_duration
         source_window.default_dict["source_video_default_dir"] = self.source_default_dir
         source_window.default_dict["export_video_default_dir"] = self.export_default_dir
+        source_window.default_dict["tutorial_text"] = source_window.tutorial_text 
         # self.source_default_dir
         # self.export_default_dir
         with open("user_default.json", "w") as write_file:
@@ -686,13 +690,7 @@ class SettingsWindow(tk.Toplevel):
 
 
 
-tutorial_file = open("tutorial.txt","r")
-tutorial_text_list =  tutorial_file.readlines()
-tutorial_text_var = ""
-for line in tutorial_text_list:
-    tutorial_text_var += line
-    
-app = InitialWindow(tutorial_text_var)
+app = InitialWindow()
 app.title("Video Editing software V1")
 app.geometry("900x500")
 app.mainloop()

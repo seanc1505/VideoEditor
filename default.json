@@ -4,5 +4,6 @@
     "source_video_default_dir": "./",
     "export_video_default_dir": "./",
     "date":null,
-    "default_clip_duration": null
+    "default_clip_duration": null,
+    "tutorial_text": "Simple work flow for this program \n    1. Import source video of .mp4 format (New source video button) \n    2. Press the New Subclip Button \n            -This will open a new subclip window \n    3. Here add the start/duration/end times of each clip \n            -Only one time entry is required. \n            -Start and end time will be prioritised if all three times are entered\n    4. Press create subclip \n            -This will display the start and end time and frames of the clip below \n            -It will reset the times boxes \n            -It will increment the clip number \n    5. Repeat steps 3/4 with as many subclips as desired \n            -Replacing one subclip can be done by changing the subclip number in the box \n    6. Press close and all of these subclips will be stored \n    7. If clips from another source video are desired add a new source video (step1 onwards) \n    8. When all subclips have been set, enter the export video detail names and press set export name \n    9. Press export video and allow the program some time to run \n "
 }
