@@ -17,4 +17,3 @@ import os
 import numpy as np
 
 
-print("Miss u wanna kiss u")
