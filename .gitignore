@@ -3,3 +3,6 @@ vids for editor test/
 user_default.json
 __pycache__/
 *.spec
+train_1/
+train_2/
+*.mp4
