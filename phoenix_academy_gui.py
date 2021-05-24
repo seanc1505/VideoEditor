@@ -219,6 +219,12 @@ class InitialWindow(tk.Tk):
             self.final_clip = concatenate_videoclips(self.subclip_list)
             file_name = self.check_file_name(self.export_video_name)
             self.final_clip.write_videofile(file_name)
+            self.subclip_dict_list = []
+            self.subclip_dict_list_label.config(text="Subclip List: \n")
+            self.subclip_list = []
+            self.export_video_length_label.config(text ="")
+            self.number_of_subclips = 0
+
 
 
     def on_tutorial_button(self):
@@ -445,7 +451,7 @@ class SubclipWindow(tk.Toplevel):
 
     def subclip_save(self,source_window):
         self.number_of_subclips +=1
-        self.subclip_name = int(self.clip_number_entry.get())
+        self.subclip_name = int(self.clip_number_entry.get())-1
         self.subclip_details_dict["subclip name"] = self.subclip_name
         self.subclip_details_label_text += "\n Subclip: " +  str(self.subclip_details_dict["subclip name"]) + " Start Time: " 
         self.subclip_details_label_text += source_window.create_time_string(self.subclip_details_dict["start time"])
@@ -454,10 +460,10 @@ class SubclipWindow(tk.Toplevel):
         self.clip_number_entry.delete(0,END)
         self.clip_number_entry.insert(0,str(self.number_of_subclips+1))
         self.subclip_details_dict["source video"] = source_window.source_video_clip
-        if self.subclip_details_dict["subclip name"]>len(source_window.subclip_dict_list):
+        if self.subclip_details_dict["subclip name"]>=len(source_window.subclip_dict_list):
             source_window.subclip_dict_list.append(self.subclip_details_dict.copy())
         else:
-            source_window.subclip_dict_list[self.subclip_details_dict["subclip name"]-1] = self.subclip_details_dict.copy()
+            source_window.subclip_dict_list[self.subclip_details_dict["subclip name"]] = self.subclip_details_dict.copy()
         
 
     def calc_duration(self):
