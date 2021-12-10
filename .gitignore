@@ -6,3 +6,7 @@ __pycache__/
 train_1/
 train_2/
 *.mp4
+*.csv
+*.txt
+*.zip
+*.log
